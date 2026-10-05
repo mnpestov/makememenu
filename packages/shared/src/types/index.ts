@@ -1,4 +1,4 @@
-import type { Difficulty, DayOfWeek, Unit, MealType } from '../enums/index.js';
+import type { Difficulty, DayOfWeek, Unit, MealType } from '../enums/index';
 
 // ─── Category ────────────────────────────────────────────────────────────────
 
@@ -66,14 +66,22 @@ export interface WeeklyMenuFull {
 
 // ─── Shopping List ────────────────────────────────────────────────────────────
 
+export interface ShoppingItemDate {
+  id: number;
+  neededAt: string; // ISO date string
+}
+
 export interface ShoppingItem {
   id: number;
   menuId: number;
   ingredient: Ingredient;
+  /** Aggregated amount in base unit (GRAM, MILLILITER, or PIECE) */
   totalAmount: number;
+  /** Base unit stored in DB: GRAM, MILLILITER, or PIECE */
   unit: Unit;
   isPurchased: boolean;
-  neededOnDates: string[]; // ISO date strings
+  /** Days when this ingredient is needed */
+  neededDates: ShoppingItemDate[];
 }
 
 // ─── Cooking History ──────────────────────────────────────────────────────────
@@ -92,21 +100,24 @@ export interface DaySettings {
 }
 
 export interface AppSettings {
+  id: number;
   familySize: number;
   mealsPerDay: number;
-  targetServings: number; // = familySize * mealsPerDay
+  /** Computed: familySize * mealsPerDay. Not stored in DB (ADR-011). */
+  targetServings: number;
   daySettings: Record<DayOfWeek, DaySettings>;
 }
 
-// ─── Generator Error ──────────────────────────────────────────────────────────
+// ─── Generator ────────────────────────────────────────────────────────────────
 
 export interface GenerationError {
-  error: 'INSUFFICIENT_DISHES' | 'NO_SUITABLE_DISHES';
+  error: 'INSUFFICIENT_DISHES' | 'NO_SUITABLE_DISHES' | 'MENU_ALREADY_EXISTS';
   message: string;
-  details: {
-    mealType: MealType;
+  details?: {
+    mealType?: MealType;
     dayOfWeek?: DayOfWeek;
     required?: number;
     available?: number;
+    existingMenuId?: number;
   };
 }

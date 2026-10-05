@@ -1,0 +1,197 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+/// Unit stored in DishIngredient can be any value.
+/// Unit stored in ShoppingItem is always a BASE unit (GRAM, MILLILITER, or PIECE).
+/// KILOGRAM and LITER are converted to base units during Shopping List aggregation (ADR-009).
+enum Unit {
+  GRAM
+  KILOGRAM
+  MILLILITER
+  LITER
+  PIECE
+}
+
+// ─── Reference Tables ─────────────────────────────────────────────────────────
+
+/// Dish category reference (extendable, not hardcoded in business logic).
+/// Seed provides default categories; users can add more.
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  dishes    Dish[]
+}
+
+/// Normalized ingredient reference.
+/// Shared across dishes — enables Shopping List aggregation by ingredient ID.
+model Ingredient {
+  id              Int              @id @default(autoincrement())
+  name            String           @unique
+  createdAt       DateTime         @default(now())
+  dishIngredients DishIngredient[]
+  shoppingItems   ShoppingItem[]
+}
+
+// ─── Dish ────────────────────────────────────────────────────────────────────
+
+model Dish {
+  id           Int      @id @default(autoincrement())
+  name         String
+  categoryId   Int
+  difficulty   Difficulty
+  /// Number of servings in the base recipe. Used to compute scale factor.
+  servings     Int
+  recipe       String?
+  /// КБЖУ per 100g — entered manually by user. Not computed by the app.
+  calories     Float?
+  protein      Float?
+  fat          Float?
+  carbs        Float?
+  forBreakfast Boolean  @default(false)
+  forLunch     Boolean  @default(false)
+  /// Cache of the last CookingHistory.cookedAt for this dish.
+  /// Updated by syncCookingHistory(). Source of truth: CookingHistory table. (ADR-014)
+  lastCookedAt DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  category       Category         @relation(fields: [categoryId], references: [id])
+  ingredients    DishIngredient[]
+  menuItems      MenuItem[]
+  cookingHistory CookingHistory[]
+}
+
+/// Ingredient entry within a dish recipe.
+/// amount + unit define the base recipe quantity (for dish.servings portions).
+model DishIngredient {
+  id           Int        @id @default(autoincrement())
+  dishId       Int
+  ingredientId Int
+  amount       Float
+  unit         Unit
+
+  dish       Dish       @relation(fields: [dishId], references: [id], onDelete: Cascade)
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id])
+
+  /// One ingredient appears once per dish (same unit semantics enforced by domain).
+  @@unique([dishId, ingredientId])
+}
+
+// ─── Weekly Menu ─────────────────────────────────────────────────────────────
+
+/// A planned week. weekStart = Monday 00:00 UTC.
+/// Old menus are kept as archive — never deleted automatically (ADR-012).
+model WeeklyMenu {
+  id        Int      @id @default(autoincrement())
+  /// Monday 00:00 UTC. Unique per week.
+  weekStart DateTime @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items         MenuItem[]
+  shoppingItems ShoppingItem[]
+}
+
+/// A single meal slot in the weekly plan.
+/// DINNER is not a separate entity — frontend shows LUNCH as dinner (domain rule).
+model MenuItem {
+  id       Int      @id @default(autoincrement())
+  menuId   Int
+  dishId   Int
+  mealType MealType
+  /// The specific day this meal belongs to (UTC midnight).
+  date     DateTime
+
+  menu           WeeklyMenu       @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  dish           Dish             @relation(fields: [dishId], references: [id])
+  cookingHistory CookingHistory[]
+
+  /// One breakfast and one lunch per day per menu.
+  @@unique([menuId, date, mealType])
+}
+
+// ─── Shopping List ────────────────────────────────────────────────────────────
+
+/// Denormalized cache derived from: WeeklyMenu → MenuItem → Dish → DishIngredient.
+/// Rebuilt on every menu change. isPurchased is preserved across rebuilds (ADR in decisions.md).
+/// unit is always a BASE unit: GRAM, MILLILITER, or PIECE (ADR-009).
+model ShoppingItem {
+  id           Int      @id @default(autoincrement())
+  menuId       Int
+  ingredientId Int
+  /// Total aggregated amount in base unit.
+  totalAmount  Float
+  /// Base unit only: GRAM, MILLILITER, or PIECE.
+  unit         Unit
+  isPurchased  Boolean  @default(false)
+
+  menu        WeeklyMenu         @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  ingredient  Ingredient         @relation(fields: [ingredientId], references: [id])
+  neededDates ShoppingItemDate[]
+
+  /// One entry per ingredient+base-unit combination per menu.
+  @@unique([menuId, ingredientId, unit])
+}
+
+/// Dates when a shopping item is needed (1:N from ShoppingItem).
+/// Cascade-deleted when parent ShoppingItem is deleted (ADR-010).
+model ShoppingItemDate {
+  id             Int      @id @default(autoincrement())
+  shoppingItemId Int
+  /// The day this ingredient is required (UTC midnight).
+  neededAt       DateTime
+
+  shoppingItem ShoppingItem @relation(fields: [shoppingItemId], references: [id], onDelete: Cascade)
+}
+
+// ─── Cooking History ─────────────────────────────────────────────────────────
+
+/// Record of when a dish was cooked.
+/// Created automatically by syncCookingHistory() when a MenuItem's date passes (ADR-014).
+/// Source of truth for dish.lastCookedAt (which is only a cache).
+model CookingHistory {
+  id         Int      @id @default(autoincrement())
+  dishId     Int
+  cookedAt   DateTime
+  /// Nullable — if the originating MenuItem is removed, history is preserved.
+  menuItemId Int?
+
+  dish     Dish      @relation(fields: [dishId], references: [id], onDelete: Cascade)
+  menuItem MenuItem? @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
+}
+
+// ─── Settings ────────────────────────────────────────────────────────────────
+
+/// Application settings singleton (always one row, id=1).
+/// targetServings is NOT stored — computed as familySize * mealsPerDay (ADR-011).
+/// daySettings is a JSON object: Record<DayOfWeek, { allowedDifficulties: Difficulty[] }>
+model Settings {
+  id          Int      @id @default(autoincrement())
+  familySize  Int      @default(3)
+  mealsPerDay Int      @default(2)
+  /// JSON: Record<DayOfWeek, DaySettings>
+  /// Example: { "MONDAY": { "allowedDifficulties": ["EASY", "MEDIUM", "HARD"] }, ... }
+  daySettings Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

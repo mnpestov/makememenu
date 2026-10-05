@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Difficulty, MealType, Unit, DayOfWeek } from '../enums/index.js';
+import { Difficulty, MealType, Unit, DayOfWeek } from '../enums/index';
 
 // ─── Category ────────────────────────────────────────────────────────────────
 
