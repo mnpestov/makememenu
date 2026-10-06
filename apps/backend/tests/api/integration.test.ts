@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
 import app from '../../src/app';
-import { Unit, Difficulty, MealType } from '@family-menu/shared';
+import { Unit, Difficulty, MealType } from '@make-me-menu/shared';
 import prisma from '../../src/db/prismaClient';
 
 describe('API Integration Flow', () => {

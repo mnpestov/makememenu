@@ -10,7 +10,7 @@ import {
   type Ingredient, 
   type CreateDishDto, 
   type UpdateDishDto 
-} from '@family-menu/shared';
+} from '@make-me-menu/shared';
 import { X, Plus, Trash2 } from 'lucide-react';
 
 interface DishFormModalProps {

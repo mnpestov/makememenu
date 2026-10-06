@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
-import type { ShoppingItem } from '@family-menu/shared';
+import type { ShoppingItem } from '@make-me-menu/shared';
 import { ShoppingCart, Calendar, CheckCircle2, Circle } from 'lucide-react';
 
 const dayNamesShort = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];

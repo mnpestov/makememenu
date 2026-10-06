@@ -8,7 +8,7 @@ import {
   ReplaceMenuItemSchema, 
   RandomReplaceMenuItemSchema,
   UpdateShoppingItemSchema
-} from '@family-menu/shared';
+} from '@make-me-menu/shared';
 import { NotFoundError } from '../utils/errors';
 
 import type { Router as ExpressRouter } from 'express';

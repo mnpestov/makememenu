@@ -1,5 +1,5 @@
 import prisma from '../db/prismaClient';
-import { CreateCategoryDto, Category } from '@family-menu/shared';
+import { CreateCategoryDto, Category } from '@make-me-menu/shared';
 import { NotFoundError, ConflictError } from '../utils/errors';
 
 export class CategoryService {

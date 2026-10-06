@@ -14,7 +14,7 @@ function Layout() {
       <aside className="sidebar">
         <div className="sidebar-header">
           <Home size={24} />
-          Family Menu
+          Make Me Menu
         </div>
         <nav className="sidebar-nav">
           <NavLink to="/" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>

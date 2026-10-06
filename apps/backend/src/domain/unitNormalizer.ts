@@ -1,4 +1,4 @@
-import { Unit } from '@family-menu/shared';
+import { Unit } from '@make-me-menu/shared';
 
 /**
  * Normalizes an amount and unit to the system's base unit.

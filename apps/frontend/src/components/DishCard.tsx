@@ -1,5 +1,5 @@
-import type { DishSummary, DishFull } from '@family-menu/shared';
-import { COOK_LABELS } from '@family-menu/shared';
+import type { DishSummary, DishFull } from '@make-me-menu/shared';
+import { COOK_LABELS } from '@make-me-menu/shared';
 import { Info } from 'lucide-react';
 
 interface DishCardProps {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api/client';
-import type { WeeklyMenuFull, DishFull } from '@family-menu/shared';
+import type { WeeklyMenuFull, DishFull } from '@make-me-menu/shared';
 import { Calendar, RefreshCw, RefreshCcw, Trash2 } from 'lucide-react';
 import { DishCard } from '../components/DishCard';
 import { DishDetailsModal } from '../components/DishDetailsModal';

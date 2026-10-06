@@ -1,5 +1,5 @@
-import type { DishFull } from '@family-menu/shared';
-import { UNIT_LABELS, COOK_LABELS } from '@family-menu/shared';
+import type { DishFull } from '@make-me-menu/shared';
+import { UNIT_LABELS, COOK_LABELS } from '@make-me-menu/shared';
 import { X } from 'lucide-react';
 
 interface DishDetailsModalProps {

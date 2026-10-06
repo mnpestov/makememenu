@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Unit } from '@family-menu/shared';
+import { Unit } from '@make-me-menu/shared';
 import { normalizeUnit, formatUnitForDisplay } from '../../src/domain/unitNormalizer';
 
 describe('unitNormalizer', () => {

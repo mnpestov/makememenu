@@ -1,4 +1,4 @@
-# Family Menu Planner
+# Make Me Menu Planner
 
 Семейное приложение для планирования меню и списка покупок.
 

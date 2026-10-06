@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { MealType, Difficulty, DayOfWeek, Cook, CookPerson } from '@family-menu/shared';
+import { MealType, Difficulty, DayOfWeek, Cook, CookPerson } from '@make-me-menu/shared';
 import { generateMenu, GenerationContext, DayConfig } from '../../src/domain/menuGenerator';
 
 describe('menuGenerator', () => {

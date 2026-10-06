@@ -1,5 +1,5 @@
 {
-  "name": "@family-menu/backend",
+  "name": "@make-me-menu/backend",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -15,7 +15,7 @@
     "db:reset": "prisma migrate reset --force"
   },
   "dependencies": {
-    "@family-menu/shared": "workspace:*",
+    "@make-me-menu/shared": "workspace:*",
     "@prisma/client": "^5.19.1",
     "express": "^4.19.2",
     "zod": "^3.23.8"

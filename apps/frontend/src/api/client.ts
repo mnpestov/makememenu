@@ -14,7 +14,7 @@ import type {
   ReplaceMenuItemDto,
   ShoppingItem,
   UpdateShoppingItemDto
-} from '@family-menu/shared';
+} from '@make-me-menu/shared';
 
 const API_BASE = '/api';
 

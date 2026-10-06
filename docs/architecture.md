@@ -75,7 +75,7 @@ React + Vite + TypeScript.
 ## Структура проекта
 
 ```
-family-menu/
+make-me-menu/
 ├── apps/
 │   ├── backend/
 │   │   ├── src/

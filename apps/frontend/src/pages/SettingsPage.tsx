@@ -8,7 +8,7 @@ import {
   COOK_PERSON_LABELS,
   type AppSettings, 
   type UpdateSettingsDto 
-} from '@family-menu/shared';
+} from '@make-me-menu/shared';
 
 const dayNamesRu: Record<DayOfWeek, string> = {
   MONDAY: 'Понедельник',

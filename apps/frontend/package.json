@@ -1,5 +1,5 @@
 {
-  "name": "@family-menu/frontend",
+  "name": "@make-me-menu/frontend",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@family-menu/shared": "workspace:^",
+    "@make-me-menu/shared": "workspace:^",
     "lucide-react": "^1.52.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

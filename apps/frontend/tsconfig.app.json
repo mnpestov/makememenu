@@ -14,7 +14,7 @@
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "paths": {
-      "@family-menu/shared": ["../../packages/shared/src/index.ts"]
+      "@make-me-menu/shared": ["../../packages/shared/src/index.ts"]
     },
     "noEmit": true,
     "jsx": "react-jsx",

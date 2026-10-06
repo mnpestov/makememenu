@@ -1,5 +1,5 @@
 {
-  "name": "@family-menu/shared",
+  "name": "@make-me-menu/shared",
   "version": "1.0.0",
   "private": true,
   "main": "./dist/index.js",

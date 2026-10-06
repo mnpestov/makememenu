@@ -1,5 +1,5 @@
 import prisma from '../db/prismaClient';
-import { CreateIngredientDto, Ingredient } from '@family-menu/shared';
+import { CreateIngredientDto, Ingredient } from '@make-me-menu/shared';
 import { ConflictError } from '../utils/errors';
 
 export class IngredientService {

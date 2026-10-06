@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api/client';
-import type { DishSummary, WeeklyMenuFull } from '@family-menu/shared';
+import type { DishSummary, WeeklyMenuFull } from '@make-me-menu/shared';
 import { X, RefreshCw } from 'lucide-react';
 
 interface ReplacementModalProps {

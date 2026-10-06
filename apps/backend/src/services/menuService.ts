@@ -9,14 +9,14 @@ import {
   Difficulty,
   DaySettings,
   CookPerson
-} from '@family-menu/shared';
+} from '@make-me-menu/shared';
 import { ConflictError, NotFoundError, AppError } from '../utils/errors';
 import { generateMenu, GenerationContext, DayConfig, MenuGenerationError, isCookSuitable } from '../domain/menuGenerator';
 import { dishService } from './dishService';
 import { settingsService } from './settingsService';
 import { shoppingService } from './shoppingService';
 import { calculateWeights, weightedRandomSelect } from '../domain/historyWeighter';
-import { DishSummary } from '@family-menu/shared';
+import { DishSummary } from '@make-me-menu/shared';
 
 // Helper to get day of week enum from Date
 function getDayOfWeek(date: Date): DayOfWeek {

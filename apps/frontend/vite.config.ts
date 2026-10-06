@@ -10,7 +10,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@family-menu/shared': path.resolve(__dirname, '../../packages/shared/src/index.ts'),
+      '@make-me-menu/shared': path.resolve(__dirname, '../../packages/shared/src/index.ts'),
     },
   },
   server: {

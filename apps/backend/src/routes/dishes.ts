@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { dishService } from '../services/dishService';
 import { catchAsync } from '../utils/catchAsync';
 import { validateBody } from '../middleware/validate';
-import { CreateDishSchema, UpdateDishSchema } from '@family-menu/shared';
+import { CreateDishSchema, UpdateDishSchema } from '@make-me-menu/shared';
 
 import type { Router as ExpressRouter } from 'express';
 const router: ExpressRouter = Router();

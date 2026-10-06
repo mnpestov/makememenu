@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { ingredientService } from '../services/ingredientService';
 import { catchAsync } from '../utils/catchAsync';
 import { validateBody } from '../middleware/validate';
-import { CreateIngredientSchema } from '@family-menu/shared';
+import { CreateIngredientSchema } from '@make-me-menu/shared';
 
 import type { Router as ExpressRouter } from 'express';
 const router: ExpressRouter = Router();

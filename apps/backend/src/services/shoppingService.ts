@@ -1,5 +1,5 @@
 import prisma from '../db/prismaClient';
-import { ShoppingItem, UpdateShoppingItemDto } from '@family-menu/shared';
+import { ShoppingItem, UpdateShoppingItemDto } from '@make-me-menu/shared';
 import { NotFoundError } from '../utils/errors';
 import { buildShoppingList } from '../domain/shoppingListBuilder';
 import { settingsService } from './settingsService';

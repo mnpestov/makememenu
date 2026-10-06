@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { categoryService } from '../services/categoryService';
 import { catchAsync } from '../utils/catchAsync';
 import { validateBody } from '../middleware/validate';
-import { CreateCategorySchema } from '@family-menu/shared';
+import { CreateCategorySchema } from '@make-me-menu/shared';
 
 import type { Router as ExpressRouter } from 'express';
 const router: ExpressRouter = Router();

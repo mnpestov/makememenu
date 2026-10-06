@@ -1,5 +1,5 @@
 import prisma from '../db/prismaClient';
-import { CreateDishDto, UpdateDishDto, DishSummary, DishFull } from '@family-menu/shared';
+import { CreateDishDto, UpdateDishDto, DishSummary, DishFull } from '@make-me-menu/shared';
 import { NotFoundError, ConflictError } from '../utils/errors';
 
 export class DishService {

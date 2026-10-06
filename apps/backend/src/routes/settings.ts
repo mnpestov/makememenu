@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { settingsService } from '../services/settingsService';
 import { catchAsync } from '../utils/catchAsync';
 import { validateBody } from '../middleware/validate';
-import { UpdateSettingsSchema } from '@family-menu/shared';
+import { UpdateSettingsSchema } from '@make-me-menu/shared';
 
 import type { Router as ExpressRouter } from 'express';
 const router: ExpressRouter = Router();

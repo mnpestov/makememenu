@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api/client';
-import type { DishSummary } from '@family-menu/shared';
-import { COOK_LABELS } from '@family-menu/shared';
+import type { DishSummary } from '@make-me-menu/shared';
+import { COOK_LABELS } from '@make-me-menu/shared';
 import { Search, Plus } from 'lucide-react';
 import { DishFormModal } from '../components/DishFormModal';
 

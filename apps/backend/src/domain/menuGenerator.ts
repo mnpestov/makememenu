@@ -1,4 +1,4 @@
-import { DishSummary, DayOfWeek, Difficulty, MealType, Cook, CookPerson } from '@family-menu/shared';
+import { DishSummary, DayOfWeek, Difficulty, MealType, Cook, CookPerson } from '@make-me-menu/shared';
 import { calculateWeights, weightedRandomSelect } from './historyWeighter';
 
 export interface DayConfig {

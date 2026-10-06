@@ -1,4 +1,4 @@
-# Product: Family Menu Planner
+# Product: Make Me Menu Planner
 
 ## Проблема
 

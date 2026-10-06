@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Unit, MealType, Difficulty } from '@family-menu/shared';
+import { Unit, MealType, Difficulty } from '@make-me-menu/shared';
 import { buildShoppingList } from '../../src/domain/shoppingListBuilder';
 
 describe('shoppingListBuilder', () => {

@@ -1,4 +1,4 @@
-import { Unit, DishSummary, MenuItem, Ingredient, DishIngredientItem } from '@family-menu/shared';
+import { Unit, DishSummary, MenuItem, Ingredient, DishIngredientItem } from '@make-me-menu/shared';
 import { normalizeUnit } from './unitNormalizer';
 import { scaleIngredient } from './ingredientScaler';
 

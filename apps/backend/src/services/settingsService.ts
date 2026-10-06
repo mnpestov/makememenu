@@ -1,5 +1,5 @@
 import prisma from '../db/prismaClient';
-import { AppSettings, UpdateSettingsDto, DayOfWeek, Difficulty, CookPerson, DaySettings } from '@family-menu/shared';
+import { AppSettings, UpdateSettingsDto, DayOfWeek, Difficulty, CookPerson, DaySettings } from '@make-me-menu/shared';
 
 const DEFAULT_COOKS: CookPerson[] = [CookPerson.YULIA, CookPerson.MISHA];
 
