@@ -1,4 +1,4 @@
-import type { Difficulty, DayOfWeek, Unit, MealType } from '../enums/index';
+import type { Difficulty, DayOfWeek, Unit, MealType, Cook, CookPerson } from '../enums/index';
 
 // ─── Category ────────────────────────────────────────────────────────────────
 
@@ -27,8 +27,10 @@ export interface DishIngredientItem {
 export interface DishSummary {
   id: number;
   name: string;
-  category: Category;
+  categoryId?: number | null;
+  category: Category | null;
   difficulty: Difficulty;
+  cook: Cook;
   servings: number;
   forBreakfast: boolean;
   forLunch: boolean;
@@ -97,6 +99,7 @@ export interface CookingHistoryEntry {
 
 export interface DaySettings {
   allowedDifficulties: Difficulty[];
+  availableCooks: CookPerson[];
 }
 
 export interface AppSettings {

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Difficulty, MealType, Unit, DayOfWeek } from '../enums/index';
+import { Difficulty, Unit, DayOfWeek, Cook, CookPerson } from '../enums/index';
 
 // ─── Category ────────────────────────────────────────────────────────────────
 
@@ -22,15 +22,16 @@ export type CreateIngredientDto = z.infer<typeof CreateIngredientSchema>;
 export const DishIngredientInputSchema = z.object({
   ingredientId: z.number().int().positive(),
   amount: z.number().positive(),
-  unit: z.enum([Unit.GRAM, Unit.KILOGRAM, Unit.MILLILITER, Unit.LITER, Unit.PIECE]),
+  unit: z.enum([Unit.GRAM, Unit.KILOGRAM, Unit.MILLILITER, Unit.LITER, Unit.PIECE, Unit.TEASPOON, Unit.TABLESPOON, Unit.CUP]),
 });
 
 export type DishIngredientInput = z.infer<typeof DishIngredientInputSchema>;
 
 export const CreateDishSchema = z.object({
   name: z.string().min(1).max(300),
-  categoryId: z.number().int().positive(),
+  categoryId: z.number().int().positive().nullable().optional(),
   difficulty: z.enum([Difficulty.EASY, Difficulty.MEDIUM, Difficulty.HARD]),
+  cook: z.enum([Cook.YULIA, Cook.MISHA, Cook.BOTH]).default(Cook.BOTH),
   servings: z.number().int().positive(),
   forBreakfast: z.boolean(),
   forLunch: z.boolean(),
@@ -86,6 +87,9 @@ const DaySettingsSchema = z.object({
   allowedDifficulties: z.array(
     z.enum([Difficulty.EASY, Difficulty.MEDIUM, Difficulty.HARD])
   ).min(1),
+  availableCooks: z.array(
+    z.enum([CookPerson.YULIA, CookPerson.MISHA])
+  ).min(1).default([CookPerson.YULIA, CookPerson.MISHA]),
 });
 
 export const UpdateSettingsSchema = z.object({

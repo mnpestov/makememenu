@@ -31,9 +31,23 @@ export const Unit = {
   MILLILITER: 'MILLILITER',
   LITER: 'LITER',
   PIECE: 'PIECE',
+  TEASPOON: 'TEASPOON',
+  TABLESPOON: 'TABLESPOON',
+  CUP: 'CUP',
 } as const;
 
 export type Unit = (typeof Unit)[keyof typeof Unit];
+
+export const UNIT_LABELS: Record<Unit, string> = {
+  GRAM: 'гр',
+  KILOGRAM: 'кг',
+  MILLILITER: 'мл',
+  LITER: 'л',
+  PIECE: 'шт',
+  TEASPOON: 'ч.л.',
+  TABLESPOON: 'ст.л.',
+  CUP: 'чашка',
+};
 
 /**
  * День недели для настроек генерации.
@@ -82,3 +96,36 @@ export const DEFAULT_CATEGORIES = [
 ] as const;
 
 export type DefaultCategory = (typeof DEFAULT_CATEGORIES)[number];
+
+/**
+ * Повар блюда (кто может готовить).
+ */
+export const Cook = {
+  YULIA: 'YULIA',
+  MISHA: 'MISHA',
+  BOTH: 'BOTH',
+} as const;
+
+export type Cook = (typeof Cook)[keyof typeof Cook];
+
+export const COOK_LABELS: Record<Cook, string> = {
+  YULIA: 'Юля',
+  MISHA: 'Миша',
+  BOTH: 'Юля и Миша',
+};
+
+/**
+ * Члены семьи, которые могут быть назначены готовить в конкретный день.
+ */
+export const CookPerson = {
+  YULIA: 'YULIA',
+  MISHA: 'MISHA',
+} as const;
+
+export type CookPerson = (typeof CookPerson)[keyof typeof CookPerson];
+
+export const COOK_PERSON_LABELS: Record<CookPerson, string> = {
+  YULIA: 'Юля',
+  MISHA: 'Миша',
+};
+

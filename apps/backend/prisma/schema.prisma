@@ -20,6 +20,12 @@ enum Difficulty {
   HARD
 }
 
+enum Cook {
+  YULIA
+  MISHA
+  BOTH
+}
+
 /// Unit stored in DishIngredient can be any value.
 /// Unit stored in ShoppingItem is always a BASE unit (GRAM, MILLILITER, or PIECE).
 /// KILOGRAM and LITER are converted to base units during Shopping List aggregation (ADR-009).
@@ -29,6 +35,9 @@ enum Unit {
   MILLILITER
   LITER
   PIECE
+  TEASPOON
+  TABLESPOON
+  CUP
 }
 
 // ─── Reference Tables ─────────────────────────────────────────────────────────
@@ -57,8 +66,9 @@ model Ingredient {
 model Dish {
   id           Int      @id @default(autoincrement())
   name         String
-  categoryId   Int
+  categoryId   Int?
   difficulty   Difficulty
+  cook         Cook     @default(BOTH)
   /// Number of servings in the base recipe. Used to compute scale factor.
   servings     Int
   recipe       String?
@@ -75,7 +85,7 @@ model Dish {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  category       Category         @relation(fields: [categoryId], references: [id])
+  category       Category?        @relation(fields: [categoryId], references: [id])
   ingredients    DishIngredient[]
   menuItems      MenuItem[]
   cookingHistory CookingHistory[]

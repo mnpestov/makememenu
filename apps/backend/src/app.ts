@@ -29,12 +29,19 @@ app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// ─── API Routes (stubs — filled in subsequent stages) ─────────────────────────
-// app.use('/api/categories', categoriesRouter);
-// app.use('/api/ingredients', ingredientsRouter);
-// app.use('/api/dishes', dishesRouter);
-// app.use('/api/menus', menusRouter);
-// app.use('/api/settings', settingsRouter);
+// ─── API Routes ────────────────────────────────────────────────────────────────
+
+import categoriesRouter from './routes/categories';
+import ingredientsRouter from './routes/ingredients';
+import dishesRouter from './routes/dishes';
+import menusRouter from './routes/menus';
+import settingsRouter from './routes/settings';
+
+app.use('/api/categories', categoriesRouter);
+app.use('/api/ingredients', ingredientsRouter);
+app.use('/api/dishes', dishesRouter);
+app.use('/api/menus', menusRouter);
+app.use('/api/settings', settingsRouter);
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
 
@@ -44,10 +51,8 @@ app.use((_req: Request, res: Response) => {
 
 // ─── Global Error Handler ────────────────────────────────────────────────────
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error('[ERROR]', err.message, err.stack);
-  res.status(500).json({ error: 'INTERNAL_ERROR', message: 'Internal server error' });
-});
+import { errorHandler } from './middleware/errorHandler';
+app.use(errorHandler);
+
 
 export default app;

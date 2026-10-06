@@ -11,7 +11,7 @@
  * Idempotent: clears all tables before seeding (safe for dev only).
  */
 
-import { PrismaClient, Difficulty, Unit } from '@prisma/client';
+import { PrismaClient, Difficulty, Unit, Cook } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -19,13 +19,13 @@ const prisma = new PrismaClient();
 
 /** Default day settings: all difficulties allowed Mon/Tue/Fri/Sat/Sun; Wed/Thu: EASY/MEDIUM only */
 const DEFAULT_DAY_SETTINGS = {
-  MONDAY:    { allowedDifficulties: ['EASY', 'MEDIUM', 'HARD'] },
-  TUESDAY:   { allowedDifficulties: ['EASY', 'MEDIUM', 'HARD'] },
-  WEDNESDAY: { allowedDifficulties: ['EASY', 'MEDIUM'] },
-  THURSDAY:  { allowedDifficulties: ['EASY', 'MEDIUM'] },
-  FRIDAY:    { allowedDifficulties: ['EASY', 'MEDIUM', 'HARD'] },
-  SATURDAY:  { allowedDifficulties: ['EASY', 'MEDIUM', 'HARD'] },
-  SUNDAY:    { allowedDifficulties: ['EASY', 'MEDIUM', 'HARD'] },
+  MONDAY:    { allowedDifficulties: ['EASY', 'MEDIUM', 'HARD'], availableCooks: ['YULIA', 'MISHA'] },
+  TUESDAY:   { allowedDifficulties: ['EASY', 'MEDIUM', 'HARD'], availableCooks: ['YULIA', 'MISHA'] },
+  WEDNESDAY: { allowedDifficulties: ['EASY', 'MEDIUM'],          availableCooks: ['YULIA', 'MISHA'] },
+  THURSDAY:  { allowedDifficulties: ['EASY', 'MEDIUM'],          availableCooks: ['YULIA', 'MISHA'] },
+  FRIDAY:    { allowedDifficulties: ['EASY', 'MEDIUM', 'HARD'], availableCooks: ['YULIA', 'MISHA'] },
+  SATURDAY:  { allowedDifficulties: ['EASY', 'MEDIUM', 'HARD'], availableCooks: ['YULIA', 'MISHA'] },
+  SUNDAY:    { allowedDifficulties: ['EASY', 'MEDIUM', 'HARD'], availableCooks: ['YULIA', 'MISHA'] },
 };
 
 // ─── Seed Data ────────────────────────────────────────────────────────────────
@@ -92,6 +92,7 @@ interface DishSeed {
   name: string;
   category: string;
   difficulty: Difficulty;
+  cook?: Cook;
   servings: number;
   forBreakfast: boolean;
   forLunch: boolean;
@@ -121,6 +122,7 @@ const DISHES: DishSeed[] = [
     name: 'Сырники',
     category: 'Завтрак',
     difficulty: Difficulty.MEDIUM,
+    cook: Cook.YULIA,
     servings: 3,
     forBreakfast: true,
     forLunch: false,
@@ -138,6 +140,7 @@ const DISHES: DishSeed[] = [
     name: 'Яичница с беконом',
     category: 'Завтрак',
     difficulty: Difficulty.EASY,
+    cook: Cook.MISHA,
     servings: 3,
     forBreakfast: true,
     forLunch: false,
@@ -211,6 +214,7 @@ const DISHES: DishSeed[] = [
     name: 'Паста карбонара',
     category: 'Паста',
     difficulty: Difficulty.MEDIUM,
+    cook: Cook.YULIA,
     servings: 3,
     forBreakfast: false,
     forLunch: true,
@@ -229,6 +233,7 @@ const DISHES: DishSeed[] = [
     name: 'Плов с бараниной',
     category: 'Другое',
     difficulty: Difficulty.HARD,
+    cook: Cook.MISHA,
     servings: 4,
     forBreakfast: false,
     forLunch: true,
@@ -425,6 +430,7 @@ async function main(): Promise<void> {
         name: dishData.name,
         categoryId,
         difficulty: dishData.difficulty,
+        cook: dishData.cook ?? Cook.BOTH,
         servings: dishData.servings,
         forBreakfast: dishData.forBreakfast,
         forLunch: dishData.forLunch,
