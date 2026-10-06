@@ -284,19 +284,19 @@ export function DishFormModal({ dishId, onClose }: DishFormModalProps) {
             <div className="form-grid-4" style={{ gap: '1rem' }}>
               <div>
                 <label>Ккал</label>
-                <input type="number" min="0" value={formData.calories} onChange={e => setFormData({...formData, calories: e.target.value === '' ? '' : Number(e.target.value)})} style={inputStyle} />
+                <input type="number" min="0" step="0.1" value={formData.calories} onChange={e => setFormData({...formData, calories: e.target.value === '' ? '' : Number(e.target.value)})} style={inputStyle} />
               </div>
               <div>
                 <label>Белки</label>
-                <input type="number" min="0" value={formData.protein} onChange={e => setFormData({...formData, protein: e.target.value === '' ? '' : Number(e.target.value)})} style={inputStyle} />
+                <input type="number" min="0" step="0.1" value={formData.protein} onChange={e => setFormData({...formData, protein: e.target.value === '' ? '' : Number(e.target.value)})} style={inputStyle} />
               </div>
               <div>
                 <label>Жиры</label>
-                <input type="number" min="0" value={formData.fat} onChange={e => setFormData({...formData, fat: e.target.value === '' ? '' : Number(e.target.value)})} style={inputStyle} />
+                <input type="number" min="0" step="0.1" value={formData.fat} onChange={e => setFormData({...formData, fat: e.target.value === '' ? '' : Number(e.target.value)})} style={inputStyle} />
               </div>
               <div>
                 <label>Углеводы</label>
-                <input type="number" min="0" value={formData.carbs} onChange={e => setFormData({...formData, carbs: e.target.value === '' ? '' : Number(e.target.value)})} style={inputStyle} />
+                <input type="number" min="0" step="0.1" value={formData.carbs} onChange={e => setFormData({...formData, carbs: e.target.value === '' ? '' : Number(e.target.value)})} style={inputStyle} />
               </div>
             </div>
 
