@@ -122,8 +122,8 @@ export function SettingsPage() {
     setError(null);
     try {
       const payload: UpdateSettingsDto = {
-        familySize: settings.familySize,
-        mealsPerDay: settings.mealsPerDay,
+        familySize: Number(settings.familySize) || 1,
+        mealsPerDay: Number(settings.mealsPerDay) || 1,
         daySettings: settings.daySettings,
       };
       
@@ -179,8 +179,8 @@ export function SettingsPage() {
                 type="number"
                 min="1"
                 max="20"
-                value={settings?.familySize || 1}
-                onChange={(e) => setSettings(s => s ? { ...s, familySize: parseInt(e.target.value, 10) } : s)}
+                value={settings?.familySize ?? ''}
+                onChange={(e) => setSettings(s => s ? { ...s, familySize: e.target.value === '' ? ('' as any) : parseInt(e.target.value, 10) } : s)}
                 style={{
                   padding: '0.5rem',
                   borderRadius: 'var(--radius-sm)',
@@ -199,8 +199,8 @@ export function SettingsPage() {
                 type="number"
                 min="1"
                 max="5"
-                value={settings?.mealsPerDay || 1}
-                onChange={(e) => setSettings(s => s ? { ...s, mealsPerDay: parseInt(e.target.value, 10) } : s)}
+                value={settings?.mealsPerDay ?? ''}
+                onChange={(e) => setSettings(s => s ? { ...s, mealsPerDay: e.target.value === '' ? ('' as any) : parseInt(e.target.value, 10) } : s)}
                 style={{
                   padding: '0.5rem',
                   borderRadius: 'var(--radius-sm)',

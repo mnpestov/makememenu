@@ -14,7 +14,7 @@ importers:
 
   apps/backend:
     dependencies:
-      '@family-menu/shared':
+      '@make-me-menu/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       '@prisma/client':
@@ -54,7 +54,7 @@ importers:
 
   apps/frontend:
     dependencies:
-      '@family-menu/shared':
+      '@make-me-menu/shared':
         specifier: workspace:^
         version: link:../../packages/shared
       lucide-react:

@@ -31,15 +31,15 @@ export function DishFormModal({ dishId, onClose }: DishFormModalProps) {
     categoryName: string;
     difficulty: Difficulty;
     cook: Cook;
-    servings: number;
+    servings: number | '';
     recipe: string;
-    calories: number;
-    protein: number;
-    fat: number;
-    carbs: number;
+    calories: number | '';
+    protein: number | '';
+    fat: number | '';
+    carbs: number | '';
     forBreakfast: boolean;
     forLunch: boolean;
-    ingredients: { name: string; amount: number; unit: Unit }[];
+    ingredients: { name: string; amount: number | ''; unit: Unit }[];
   }>({
     name: '',
     categoryName: '',
@@ -47,10 +47,10 @@ export function DishFormModal({ dishId, onClose }: DishFormModalProps) {
     cook: Cook.BOTH,
     servings: 1,
     recipe: '',
-    calories: 0,
-    protein: 0,
-    fat: 0,
-    carbs: 0,
+    calories: '',
+    protein: '',
+    fat: '',
+    carbs: '',
     forBreakfast: false,
     forLunch: false,
     ingredients: []
@@ -153,7 +153,7 @@ export function DishFormModal({ dishId, onClose }: DishFormModalProps) {
           const newIng = await api.ingredients.create({ name: ing.name.trim() });
           ingId = newIng.id;
         }
-        finalIngredients.push({ ingredientId: ingId, amount: ing.amount, unit: ing.unit });
+        finalIngredients.push({ ingredientId: ingId, amount: ing.amount === '' ? 1 : ing.amount, unit: ing.unit });
       }
 
       const payload = {
@@ -161,14 +161,14 @@ export function DishFormModal({ dishId, onClose }: DishFormModalProps) {
         categoryId,
         difficulty: formData.difficulty,
         cook: formData.cook,
-        servings: formData.servings,
+        servings: formData.servings === '' ? 1 : formData.servings,
         forBreakfast: formData.forBreakfast,
         forLunch: formData.forLunch,
         recipe: formData.recipe || null,
-        calories: formData.calories || null,
-        protein: formData.protein || null,
-        fat: formData.fat || null,
-        carbs: formData.carbs || null,
+        calories: formData.calories === '' ? null : formData.calories,
+        protein: formData.protein === '' ? null : formData.protein,
+        fat: formData.fat === '' ? null : formData.fat,
+        carbs: formData.carbs === '' ? null : formData.carbs,
         ingredients: finalIngredients,
       };
 
@@ -256,7 +256,7 @@ export function DishFormModal({ dishId, onClose }: DishFormModalProps) {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <label>Базовые порции (для расчёта)</label>
-                <input type="number" required min="1" value={formData.servings} onChange={e => setFormData({...formData, servings: Number(e.target.value)})} style={inputStyle} />
+                <input type="number" required min="1" value={formData.servings} onChange={e => setFormData({...formData, servings: e.target.value === '' ? '' : Number(e.target.value)})} style={inputStyle} />
               </div>
             </div>
 
@@ -284,19 +284,19 @@ export function DishFormModal({ dishId, onClose }: DishFormModalProps) {
             <div className="form-grid-4" style={{ gap: '1rem' }}>
               <div>
                 <label>Ккал</label>
-                <input type="number" min="0" value={formData.calories} onChange={e => setFormData({...formData, calories: Number(e.target.value)})} style={inputStyle} />
+                <input type="number" min="0" value={formData.calories} onChange={e => setFormData({...formData, calories: e.target.value === '' ? '' : Number(e.target.value)})} style={inputStyle} />
               </div>
               <div>
                 <label>Белки</label>
-                <input type="number" min="0" value={formData.protein} onChange={e => setFormData({...formData, protein: Number(e.target.value)})} style={inputStyle} />
+                <input type="number" min="0" value={formData.protein} onChange={e => setFormData({...formData, protein: e.target.value === '' ? '' : Number(e.target.value)})} style={inputStyle} />
               </div>
               <div>
                 <label>Жиры</label>
-                <input type="number" min="0" value={formData.fat} onChange={e => setFormData({...formData, fat: Number(e.target.value)})} style={inputStyle} />
+                <input type="number" min="0" value={formData.fat} onChange={e => setFormData({...formData, fat: e.target.value === '' ? '' : Number(e.target.value)})} style={inputStyle} />
               </div>
               <div>
                 <label>Углеводы</label>
-                <input type="number" min="0" value={formData.carbs} onChange={e => setFormData({...formData, carbs: Number(e.target.value)})} style={inputStyle} />
+                <input type="number" min="0" value={formData.carbs} onChange={e => setFormData({...formData, carbs: e.target.value === '' ? '' : Number(e.target.value)})} style={inputStyle} />
               </div>
             </div>
 
@@ -328,7 +328,7 @@ export function DishFormModal({ dishId, onClose }: DishFormModalProps) {
                         min="0.1" 
                         step="0.1"
                         value={ing.amount} 
-                        onChange={e => handleIngredientChange(i, 'amount', Number(e.target.value))} 
+                        onChange={e => handleIngredientChange(i, 'amount', e.target.value === '' ? '' : Number(e.target.value))} 
                         style={{ ...inputStyle, flex: 1 }}
                       />
                       
