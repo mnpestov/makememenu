@@ -31,17 +31,22 @@ app.get('/health', (_req: Request, res: Response) => {
 
 // ─── API Routes ────────────────────────────────────────────────────────────────
 
+import authRouter from './routes/auth';
 import categoriesRouter from './routes/categories';
 import ingredientsRouter from './routes/ingredients';
 import dishesRouter from './routes/dishes';
 import menusRouter from './routes/menus';
 import settingsRouter from './routes/settings';
+import { authenticateToken } from './middleware/authMiddleware';
 
-app.use('/api/categories', categoriesRouter);
-app.use('/api/ingredients', ingredientsRouter);
-app.use('/api/dishes', dishesRouter);
-app.use('/api/menus', menusRouter);
-app.use('/api/settings', settingsRouter);
+app.use('/api/auth', authRouter);
+
+// Protect all subsequent API routes
+app.use('/api/categories', authenticateToken, categoriesRouter);
+app.use('/api/ingredients', authenticateToken, ingredientsRouter);
+app.use('/api/dishes', authenticateToken, dishesRouter);
+app.use('/api/menus', authenticateToken, menusRouter);
+app.use('/api/settings', authenticateToken, settingsRouter);
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
 

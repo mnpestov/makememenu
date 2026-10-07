@@ -4,7 +4,9 @@ import { SettingsPage } from './pages/SettingsPage';
 import { CatalogPage } from './pages/CatalogPage';
 import { WeeklyMenuPage } from './pages/WeeklyMenuPage';
 import { ShoppingListPage } from './pages/ShoppingListPage';
+import { LoginPage } from './pages/LoginPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import './index.css';
 
 // Layout Component
@@ -62,19 +64,35 @@ function Layout() {
   );
 }
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Загрузка...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
+
+  return <>{children}</>;
+}
+
 function App() {
   return (
     <ErrorBoundary>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<WeeklyMenuPage />} />
-            <Route path="shopping" element={<ShoppingListPage />} />
-            <Route path="catalog" element={<CatalogPage />} />
-            <Route path="settings" element={<SettingsPage />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+              <Route index element={<WeeklyMenuPage />} />
+              <Route path="shopping" element={<ShoppingListPage />} />
+              <Route path="catalog" element={<CatalogPage />} />
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </ErrorBoundary>
   );
 }

@@ -12,6 +12,7 @@
  */
 
 import { PrismaClient, Difficulty, Unit, Cook } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -459,6 +460,16 @@ async function main(): Promise<void> {
       familySize: 3,
       mealsPerDay: 2,
       daySettings: DEFAULT_DAY_SETTINGS,
+    },
+  });
+
+  // ─── User ───────────────────────────────────────────────────────────────────
+  console.log('  Creating default admin user...');
+  const hashedPassword = await bcrypt.hash('password', 10);
+  await prisma.user.create({
+    data: {
+      username: 'admin',
+      password: hashedPassword,
     },
   });
 
