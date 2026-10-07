@@ -34,11 +34,11 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 
     const payload = { userId: user.id, username: user.username };
 
-    // Access token valid for 15 minutes
-    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: '15m' });
+    // Access token valid for 7 days
+    const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
     
-    // Refresh token valid for 7 days
-    const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: '7d' });
+    // Refresh token valid for 30 days
+    const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: '30d' });
 
     res.json({ accessToken, refreshToken });
   } catch (error) {
@@ -58,15 +58,15 @@ router.post('/refresh', (req: Request, res: Response): void => {
 
   jwt.verify(refreshToken, JWT_REFRESH_SECRET, (err: any, decoded: any) => {
     if (err) {
-      res.status(403).json({ error: 'FORBIDDEN', message: 'Invalid or expired refresh token' });
+      res.status(401).json({ error: 'UNAUTHORIZED', message: 'Invalid or expired refresh token' });
       return;
     }
 
     const payload = { userId: decoded.userId, username: decoded.username };
 
     // Generate new tokens
-    const newAccessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: '15m' });
-    const newRefreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: '7d' });
+    const newAccessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+    const newRefreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: '30d' });
 
     res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
   });
