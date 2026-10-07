@@ -76,6 +76,31 @@ router.get('/:menuId/shopping', catchAsync(async (req, res) => {
   res.json(list);
 }));
 
+router.get('/:menuId/shopping/estimate', catchAsync(async (req, res) => {
+  const menuId = parseInt(req.params.menuId!, 10);
+  const list = await shoppingService.getShoppingList(menuId);
+  
+  let total = 0;
+  const items = list.map(item => {
+    const ing = item.ingredient;
+    let price = 0;
+    
+    if (ing.pyaterochkaSku && ing.packAmount && ing.packPrice) {
+      const packsNeeded = Math.ceil(item.totalAmount / ing.packAmount);
+      price = packsNeeded * ing.packPrice;
+      total += price;
+    }
+    
+    return {
+      ingredientId: ing.id,
+      price: price,
+      productName: ing.pyaterochkaSku ? ing.name : 'Не привязан',
+    };
+  });
+
+  res.json({ items, total });
+}));
+
 router.patch('/:menuId/shopping/:itemId', validateBody(UpdateShoppingItemSchema), catchAsync(async (req, res) => {
   const item = await shoppingService.updateShoppingItem(
     parseInt(req.params.menuId!, 10),

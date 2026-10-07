@@ -32,6 +32,22 @@ export class IngredientService {
       createdAt: created.createdAt.toISOString()
     };
   }
+
+  async update(id: number, data: any): Promise<Ingredient> {
+    const ingredient = await prisma.ingredient.update({
+      where: { id },
+      data: {
+        pyaterochkaSku: data.pyaterochkaSku,
+        packAmount: data.packAmount,
+        packPrice: data.packPrice,
+      }
+    });
+    
+    return {
+      ...ingredient,
+      createdAt: ingredient.createdAt.toISOString()
+    };
+  }
 }
 
 export const ingredientService = new IngredientService();

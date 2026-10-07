@@ -136,6 +136,11 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+    update: (id: number, data: any) => fetchJson<Ingredient>(`/ingredients/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+    searchStore: (query: string) => fetchJson<any>(`/ingredients/search-store?q=${encodeURIComponent(query)}`),
   },
   dishes: {
     getAll: () => fetchJson<DishSummary[]>('/dishes'),
@@ -168,6 +173,8 @@ export const api = {
       }),
     getShoppingList: (menuId: number) =>
       fetchJson<ShoppingItem[]>(`/menus/${menuId}/shopping`),
+    estimateShoppingList: (menuId: number) =>
+      fetchJson<any>(`/menus/${menuId}/shopping/estimate`),
     updateShoppingItem: (menuId: number, itemId: number, data: UpdateShoppingItemDto) =>
       fetchJson<ShoppingItem>(`/menus/${menuId}/shopping/${itemId}`, {
         method: 'PATCH',

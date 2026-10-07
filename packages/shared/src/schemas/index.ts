@@ -17,6 +17,14 @@ export const CreateIngredientSchema = z.object({
 
 export type CreateIngredientDto = z.infer<typeof CreateIngredientSchema>;
 
+export const UpdateIngredientSchema = z.object({
+  pyaterochkaSku: z.string().nullable().optional(),
+  packAmount: z.number().positive().nullable().optional(),
+  packPrice: z.number().nonnegative().nullable().optional(),
+});
+
+export type UpdateIngredientDto = z.infer<typeof UpdateIngredientSchema>;
+
 // ─── Dish ────────────────────────────────────────────────────────────────────
 
 export const DishIngredientInputSchema = z.object({
