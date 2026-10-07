@@ -3,7 +3,7 @@ FROM python:3.12-slim
 WORKDIR /app
 
 # Install git (required for fetching the github repo) and other basic dependencies
-RUN apt-get update && apt-get install -y git wget gnupg gcc python3-dev libzstd-dev && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y git wget gnupg build-essential python3-dev libzstd-dev && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 
