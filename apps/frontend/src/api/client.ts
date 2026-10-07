@@ -66,11 +66,11 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
           } else {
             // Refresh failed, logout
             window.dispatchEvent(new Event('auth:logout'));
-            throw new Error('Session expired');
+            return new Promise<T>(() => {}); // pending promise to avoid unhandled rejection during unmount
           }
         } catch (e) {
           window.dispatchEvent(new Event('auth:logout'));
-          throw e;
+          return new Promise<T>(() => {}); // pending promise
         } finally {
           isRefreshing = false;
         }
@@ -96,6 +96,7 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
     } else {
       // No refresh token, force logout
       window.dispatchEvent(new Event('auth:logout'));
+      return new Promise<T>(() => {}); // pending promise
     }
   }
 
