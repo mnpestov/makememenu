@@ -3,6 +3,6 @@ uvicorn
 pydantic
 aiohttp
 httpx
-git+https://github.com/Open-Inflation/pyaterochka_api.git
+pyaterochka_api==0.2.2
 pytest
 selectolax<1.0
