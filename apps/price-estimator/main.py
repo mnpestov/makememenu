@@ -42,13 +42,10 @@ async def search_store(q: str = Query(..., description="Поисковой за�
                             imageUrl=product.get("image", None) or product.get("image_url", None)
                         ))
     except Exception as e:
-        print(f"API Init error, using mock data: {e}")
-        # MOCK DATA FOR LOCAL TESTING
-        results = [
-            SearchResultItem(sku="12345", name=f"{q} Окское 10 шт", price=129.99, imageUrl="https://via.placeholder.com/150"),
-            SearchResultItem(sku="12346", name=f"{q} Красная цена 30 шт", price=340.50, imageUrl="https://via.placeholder.com/150"),
-            SearchResultItem(sku="12347", name=f"{q} Селяночка", price=145.00, imageUrl="https://via.placeholder.com/150"),
-        ]
+        import traceback
+        traceback.print_exc()
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"Ошибка при поиске в Пятёрочке: {str(e)}")
 
     return SearchResponse(items=results)
 

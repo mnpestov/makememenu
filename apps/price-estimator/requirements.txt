@@ -4,3 +4,4 @@ pydantic
 aiohttp
 httpx
 git+https://github.com/Open-Inflation/pyaterochka_api.git
+pytest
