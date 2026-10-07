@@ -5,3 +5,4 @@ aiohttp
 httpx
 git+https://github.com/Open-Inflation/pyaterochka_api.git
 pytest
+selectolax<1.0
