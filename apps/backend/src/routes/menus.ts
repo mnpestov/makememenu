@@ -29,6 +29,19 @@ router.delete('/current', catchAsync(async (_req, res) => {
   res.status(204).send();
 }));
 
+router.get('/next', catchAsync(async (_req, res) => {
+  const menu = await menuService.getNextMenu();
+  if (!menu) {
+    throw new NotFoundError('No next week menu found');
+  }
+  res.json(menu);
+}));
+
+router.delete('/next', catchAsync(async (_req, res) => {
+  await menuService.deleteNextMenu();
+  res.status(204).send();
+}));
+
 router.get('/:id', catchAsync(async (req, res) => {
   const menu = await menuService.getById(parseInt(req.params.id!, 10));
   res.json(menu);

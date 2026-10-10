@@ -1,0 +1,72 @@
+/* ─── login ────────────────────────────────────────────────────────────────── */
+
+.login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--color-bg-secondary);
+  padding: 1rem;
+}
+
+.login__card {
+  max-width: 400px;
+  width: 100%;
+  padding: 2rem;
+}
+
+.login__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+}
+
+.login__brand-icon {
+  color: var(--color-brand-primary);
+}
+
+.login__brand-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+}
+
+.login__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.login__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.login__label {
+  display: block;
+  font-weight: 500;
+}
+
+.login__input {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-primary);
+  font-size: var(--font-size-base);
+}
+
+.login__error {
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+.login__submit {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  justify-content: center;
+}

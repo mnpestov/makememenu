@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api/client';
-import { 
-  Difficulty, 
-  DayOfWeek, 
-  WEEK_DAYS, 
+import {
+  Difficulty,
+  DayOfWeek,
+  WEEK_DAYS,
   CookPerson,
   COOK_PERSON_LABELS,
-  type AppSettings, 
-  type UpdateSettingsDto 
+  type AppSettings,
+  type UpdateSettingsDto
 } from '@make-me-menu/shared';
+import './SettingsPage.css';
 
 const dayNamesRu: Record<DayOfWeek, string> = {
   MONDAY: 'Понедельник',
@@ -27,9 +28,7 @@ export function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadSettings();
-  }, []);
+  useEffect(() => { loadSettings(); }, []);
 
   async function loadSettings() {
     setLoading(true);
@@ -48,31 +47,18 @@ export function SettingsPage() {
     if (!settings) return;
     setSettings(prev => {
       if (!prev) return prev;
-      const currentDay = prev.daySettings?.[day] || { 
+      const currentDay = prev.daySettings?.[day] || {
         allowedDifficulties: [Difficulty.EASY, Difficulty.MEDIUM, Difficulty.HARD],
-        availableCooks: [CookPerson.YULIA, CookPerson.MISHA] 
+        availableCooks: [CookPerson.YULIA, CookPerson.MISHA],
       };
       const hasDiff = currentDay.allowedDifficulties.includes(diff);
-      let newDiffs = [...currentDay.allowedDifficulties];
-      
-      if (hasDiff) {
-        newDiffs = newDiffs.filter(d => d !== diff);
-      } else {
-        newDiffs.push(diff);
-      }
-      
-      // Prevent selecting 0 difficulties
+      let newDiffs = hasDiff
+        ? currentDay.allowedDifficulties.filter(d => d !== diff)
+        : [...currentDay.allowedDifficulties, diff];
       if (newDiffs.length === 0) newDiffs = [Difficulty.EASY];
-      
       return {
         ...prev,
-        daySettings: {
-          ...prev.daySettings,
-          [day]: { 
-            ...currentDay,
-            allowedDifficulties: newDiffs 
-          }
-        }
+        daySettings: { ...prev.daySettings, [day]: { ...currentDay, allowedDifficulties: newDiffs } },
       };
     });
   };
@@ -81,34 +67,18 @@ export function SettingsPage() {
     if (!settings) return;
     setSettings(prev => {
       if (!prev) return prev;
-      const currentDay = prev.daySettings?.[day] || { 
+      const currentDay = prev.daySettings?.[day] || {
         allowedDifficulties: [Difficulty.EASY, Difficulty.MEDIUM, Difficulty.HARD],
-        availableCooks: [CookPerson.YULIA, CookPerson.MISHA] 
+        availableCooks: [CookPerson.YULIA, CookPerson.MISHA],
       };
       const currentCooks = currentDay.availableCooks || [CookPerson.YULIA, CookPerson.MISHA];
-      const hasPerson = currentCooks.includes(person);
-      let newCooks = [...currentCooks];
-
-      if (hasPerson) {
-        newCooks = newCooks.filter(p => p !== person);
-      } else {
-        newCooks.push(person);
-      }
-
-      // Prevent selecting 0 cooks (at least one cook must remain selected)
-      if (newCooks.length === 0) {
-        return prev;
-      }
-
+      const newCooks = currentCooks.includes(person)
+        ? currentCooks.filter(p => p !== person)
+        : [...currentCooks, person];
+      if (newCooks.length === 0) return prev;
       return {
         ...prev,
-        daySettings: {
-          ...prev.daySettings,
-          [day]: {
-            ...currentDay,
-            availableCooks: newCooks,
-          }
-        }
+        daySettings: { ...prev.daySettings, [day]: { ...currentDay, availableCooks: newCooks } },
       };
     });
   };
@@ -116,7 +86,6 @@ export function SettingsPage() {
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (!settings) return;
-
     setSaving(true);
     setSaveMessage(null);
     setError(null);
@@ -126,11 +95,9 @@ export function SettingsPage() {
         mealsPerDay: Number(settings.mealsPerDay) || 1,
         daySettings: settings.daySettings,
       };
-      
       const updated = await api.settings.update(payload);
       setSettings(updated);
       setSaveMessage('Настройки успешно сохранены!');
-      
       setTimeout(() => setSaveMessage(null), 3000);
     } catch (err: any) {
       setError(err.message);
@@ -140,20 +107,16 @@ export function SettingsPage() {
   }
 
   if (loading) {
-    return (
-      <div className="page-body">
-        <p>Загрузка настроек...</p>
-      </div>
-    );
+    return <div className="page-body"><p>Загрузка настроек...</p></div>;
   }
 
   if (error && !settings) {
     return (
       <div className="page-body">
-        <div className="card" style={{ borderColor: 'var(--color-danger)' }}>
-          <h2 style={{ color: 'var(--color-danger)' }}>Ошибка загрузки</h2>
+        <div className="card settings-form__error-card">
+          <h2 className="settings-form__error-title">Ошибка загрузки</h2>
           <p>{error}</p>
-          <button className="btn btn-primary" onClick={loadSettings} style={{ marginTop: '1rem' }}>
+          <button className="btn btn-primary settings-form__error-action" onClick={loadSettings}>
             Попробовать снова
           </button>
         </div>
@@ -166,108 +129,76 @@ export function SettingsPage() {
       <header className="page-header">
         <h1 className="page-title">Настройки семьи</h1>
       </header>
+
       <div className="page-body">
-        <div className="card" style={{ maxWidth: '680px' }}>
-          <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label htmlFor="familySize" style={{ fontWeight: 500 }}>
+        <div className="card settings-form">
+          <form className="settings-form__body" onSubmit={handleSave}>
+
+            <div className="settings-form__field">
+              <label className="settings-form__label" htmlFor="familySize">
                 Количество человек в семье
               </label>
               <input
                 id="familySize"
+                className="settings-form__input"
                 type="number"
                 min="1"
                 max="20"
                 value={settings?.familySize ?? ''}
-                onChange={(e) => setSettings(s => s ? { ...s, familySize: e.target.value === '' ? ('' as any) : parseInt(e.target.value, 10) } : s)}
-                style={{
-                  padding: '0.5rem',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--color-border)',
-                  fontSize: 'var(--font-size-base)'
-                }}
+                onChange={(e) => setSettings(s => s ? {
+                  ...s,
+                  familySize: e.target.value === '' ? ('' as any) : parseInt(e.target.value, 10),
+                } : s)}
               />
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label htmlFor="mealsPerDay" style={{ fontWeight: 500 }}>
+            <div className="settings-form__field">
+              <label className="settings-form__label" htmlFor="mealsPerDay">
                 Приёмов пищи в день (завтрак, обед и т.д.)
               </label>
               <input
                 id="mealsPerDay"
+                className="settings-form__input"
                 type="number"
                 min="1"
                 max="5"
                 value={settings?.mealsPerDay ?? ''}
-                onChange={(e) => setSettings(s => s ? { ...s, mealsPerDay: e.target.value === '' ? ('' as any) : parseInt(e.target.value, 10) } : s)}
-                style={{
-                  padding: '0.5rem',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--color-border)',
-                  fontSize: 'var(--font-size-base)'
-                }}
+                onChange={(e) => setSettings(s => s ? {
+                  ...s,
+                  mealsPerDay: e.target.value === '' ? ('' as any) : parseInt(e.target.value, 10),
+                } : s)}
               />
             </div>
 
-            <div style={{ marginTop: '0.5rem' }}>
-              <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
-                Итоговое количество порций для каждого рецепта будет пересчитано автоматически ({settings?.familySize} × {settings?.mealsPerDay} = {settings?.targetServings} порций).
-              </p>
-            </div>
+            <p className="settings-form__hint">
+              Итоговое количество порций для каждого рецепта будет пересчитано автоматически
+              ({settings?.familySize} × {settings?.mealsPerDay} = {settings?.targetServings} порций).
+            </p>
 
-            <h2 style={{ marginTop: '1.25rem', fontSize: 'var(--font-size-lg)', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.5rem' }}>
-              Настройки по дням недели
-            </h2>
-            <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
+            <h2 className="settings-form__days-title">Настройки по дням недели</h2>
+            <p className="settings-form__days-desc">
               Укажите, кто может готовить (Юля, Миша) и какая сложность блюд допускается в каждый день недели.
             </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div className="settings-form__days">
               {settings && WEEK_DAYS.map(day => {
                 const daySetting = settings.daySettings?.[day];
                 const allowed = daySetting?.allowedDifficulties ?? [Difficulty.EASY];
                 const cooks = daySetting?.availableCooks ?? [CookPerson.YULIA, CookPerson.MISHA];
                 return (
-                  <div 
-                    key={day} 
-                    style={{ 
-                      padding: '0.75rem', 
-                      backgroundColor: 'var(--color-bg-primary)', 
-                      borderRadius: 'var(--radius-sm)',
-                      border: '1px solid var(--color-border)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.5rem'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 600 }}>{dayNamesRu[day]}</span>
-                    </div>
+                  <div key={day} className="settings-form__day">
+                    <span className="settings-form__day-name">{dayNamesRu[day]}</span>
 
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.25rem', alignItems: 'center' }}>
-                      {/* Кто готовит */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', minWidth: '90px' }}>
-                          Кто готовит:
-                        </span>
-                        <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <div className="settings-form__day-options">
+                      <div className="settings-form__day-group">
+                        <span className="settings-form__day-group-label">Кто готовит:</span>
+                        <div className="settings-form__day-checkboxes">
                           {Object.values(CookPerson).map(person => (
-                            <label 
-                              key={person} 
-                              style={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                gap: '0.25rem', 
-                                cursor: 'pointer',
-                                fontSize: 'var(--font-size-sm)',
-                                fontWeight: 500
-                              }}
-                            >
-                              <input 
-                                type="checkbox" 
-                                checked={cooks.includes(person)} 
-                                onChange={() => handleCookToggle(day, person)} 
+                            <label key={person} className="settings-form__day-checkbox-label">
+                              <input
+                                type="checkbox"
+                                checked={cooks.includes(person)}
+                                onChange={() => handleCookToggle(day, person)}
                               />
                               <span>{COOK_PERSON_LABELS[person]}</span>
                             </label>
@@ -275,20 +206,19 @@ export function SettingsPage() {
                         </div>
                       </div>
 
-                      {/* Сложность */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', minWidth: '75px' }}>
+                      <div className="settings-form__day-group">
+                        <span className="settings-form__day-group-label settings-form__day-group-label--difficulty">
                           Сложность:
                         </span>
-                        <div style={{ display: 'flex', gap: '0.75rem' }}>
+                        <div className="settings-form__day-checkboxes">
                           {Object.values(Difficulty).map(diff => (
-                            <label key={diff} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer' }}>
-                              <input 
-                                type="checkbox" 
-                                checked={allowed.includes(diff)} 
-                                onChange={() => handleDifficultyToggle(day, diff)} 
+                            <label key={diff} className="settings-form__day-checkbox-label settings-form__day-checkbox-label--diff">
+                              <input
+                                type="checkbox"
+                                checked={allowed.includes(diff)}
+                                onChange={() => handleDifficultyToggle(day, diff)}
                               />
-                              <span style={{ fontSize: 'var(--font-size-sm)' }}>{diff}</span>
+                              <span>{diff}</span>
                             </label>
                           ))}
                         </div>
@@ -299,24 +229,11 @@ export function SettingsPage() {
               })}
             </div>
 
-            {error && (
-              <div style={{ color: 'var(--color-danger)', fontSize: 'var(--font-size-sm)' }}>
-                Ошибка: {error}
-              </div>
-            )}
+            {error && <p className="settings-form__error">Ошибка: {error}</p>}
+            {saveMessage && <p className="settings-form__success">{saveMessage}</p>}
 
-            {saveMessage && (
-              <div style={{ color: 'var(--color-accent)', fontSize: 'var(--font-size-sm)' }}>
-                {saveMessage}
-              </div>
-            )}
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-              <button 
-                type="submit" 
-                className="btn btn-primary"
-                disabled={saving}
-              >
+            <div className="settings-form__footer">
+              <button type="submit" className="btn btn-primary" disabled={saving}>
                 {saving ? 'Сохранение...' : 'Сохранить настройки'}
               </button>
             </div>

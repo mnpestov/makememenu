@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { DishSummary, WeeklyMenuFull } from '@make-me-menu/shared';
 import { X, RefreshCw } from 'lucide-react';
+import './ReplacementModal.css';
 
 interface ReplacementModalProps {
   menuId: number;
@@ -47,72 +48,64 @@ export function ReplacementModal({ menuId, itemId, onClose, onSuccess }: Replace
   };
 
   return (
-    <div 
-      className="modal-overlay"
-      onClick={onClose}
-    >
-      <div 
-        className="card modal-content"
+    <div className="modal-overlay" onClick={onClose}>
+      <div
+        className="card modal-content replacement-modal"
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: '500px', display: 'flex', flexDirection: 'column', padding: 0 }}
       >
-        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 600, margin: 0 }}>Выберите замену</h2>
-          <button 
-            onClick={onClose}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center' }}
-          >
+        <div className="replacement-modal__header">
+          <h2 className="replacement-modal__title">Выберите замену</h2>
+          <button className="replacement-modal__close" onClick={onClose}>
             <X size={24} />
           </button>
         </div>
 
-        <div style={{ padding: '1.5rem', overflowY: 'auto', flex: 1 }}>
+        <div className="replacement-modal__body">
           {loading ? (
-            <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
-              <RefreshCw className="animate-spin" size={24} style={{ color: 'var(--color-text-secondary)' }} />
+            <div className="replacement-modal__loading">
+              <RefreshCw className="replacement-modal__candidate-spinner" size={24} />
             </div>
           ) : error ? (
-            <div style={{ color: 'var(--color-danger)', textAlign: 'center', padding: '1rem' }}>
+            <div className="replacement-modal__error">
               <p>{error}</p>
-              <button className="btn btn-secondary" onClick={loadCandidates} style={{ marginTop: '1rem' }}>
+              <button
+                className="btn btn-secondary replacement-modal__error-action"
+                onClick={loadCandidates}
+              >
                 Повторить
               </button>
             </div>
           ) : candidates.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-secondary)' }}>
+            <div className="replacement-modal__empty">
               Подходящих вариантов для замены не найдено.
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div className="replacement-modal__list">
               {candidates.map(dish => (
                 <button
                   key={dish.id}
+                  className={[
+                    'replacement-modal__candidate',
+                    replacingId !== null && replacingId !== dish.id
+                      ? 'replacement-modal__candidate--loading'
+                      : ''
+                  ].join(' ')}
                   onClick={() => handleSelect(dish.id)}
                   disabled={replacingId !== null}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-start',
-                    padding: '1rem',
-                    border: '1px solid var(--color-border)',
-                    borderRadius: 'var(--radius-md)',
-                    backgroundColor: 'var(--color-bg-secondary)',
-                    cursor: replacingId ? 'not-allowed' : 'pointer',
-                    opacity: replacingId && replacingId !== dish.id ? 0.5 : 1,
-                    transition: 'all 0.2s',
-                    textAlign: 'left'
-                  }}
-                  className="candidate-card"
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '0.25rem' }}>
-                    <span style={{ fontWeight: 600, fontSize: 'var(--font-size-base)', color: 'var(--color-text-primary)' }}>{dish.name}</span>
+                  <div className="replacement-modal__candidate-header">
+                    <span className="replacement-modal__candidate-name">{dish.name}</span>
                     {replacingId === dish.id && (
-                      <RefreshCw className="animate-spin" size={16} style={{ color: 'var(--color-brand-primary)' }} />
+                      <RefreshCw className="replacement-modal__candidate-spinner" size={16} />
                     )}
                   </div>
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>{dish.category?.name || 'Без категории'}</span>
-                    <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>• {dish.difficulty}</span>
+                  <div className="replacement-modal__candidate-meta">
+                    <span className="replacement-modal__candidate-category">
+                      {dish.category?.name || 'Без категории'}
+                    </span>
+                    <span className="replacement-modal__candidate-difficulty">
+                      • {dish.difficulty}
+                    </span>
                   </div>
                 </button>
               ))}
@@ -120,12 +113,6 @@ export function ReplacementModal({ menuId, itemId, onClose, onSuccess }: Replace
           )}
         </div>
       </div>
-      <style>{`
-        .candidate-card:hover:not(:disabled) {
-          border-color: var(--color-brand-primary);
-          background-color: var(--color-brand-subtle);
-        }
-      `}</style>
     </div>
   );
 }

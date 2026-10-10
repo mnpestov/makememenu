@@ -240,6 +240,14 @@ body {
   align-items: center;
 }
 
+/* App loading state */
+.app__loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
 /* Responsive Mobile Layout */
 @media (max-width: 768px) {
   .app-layout {

@@ -68,7 +68,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Загрузка...</div>;
+    return <div className="app__loading">Загрузка...</div>;
   }
 
   if (!isAuthenticated) {

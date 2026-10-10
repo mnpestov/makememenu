@@ -1,0 +1,136 @@
+/* ─── settings-form ────────────────────────────────────────────────────────── */
+
+.settings-form {
+  max-width: 680px;
+}
+
+.settings-form__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.settings-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.settings-form__label {
+  font-weight: 500;
+}
+
+.settings-form__input {
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  font-size: var(--font-size-base);
+  width: 100%;
+}
+
+.settings-form__hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.settings-form__days-title {
+  margin-top: 1.25rem;
+  font-size: var(--font-size-lg);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.5rem;
+}
+
+.settings-form__days-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.settings-form__days {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.settings-form__day {
+  padding: 0.75rem;
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.settings-form__day-name {
+  font-weight: 600;
+}
+
+.settings-form__day-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.settings-form__day-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.settings-form__day-group-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  min-width: 90px;
+}
+
+.settings-form__day-group-label--difficulty {
+  min-width: 75px;
+}
+
+.settings-form__day-checkboxes {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.settings-form__day-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.settings-form__day-checkbox-label--diff {
+  font-weight: 400;
+}
+
+.settings-form__error {
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+}
+
+.settings-form__success {
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+}
+
+.settings-form__footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+/* Error state card (loading error) */
+.settings-form__error-card {
+  border-color: var(--color-danger);
+}
+
+.settings-form__error-title {
+  color: var(--color-danger);
+}
+
+.settings-form__error-action {
+  margin-top: 1rem;
+}

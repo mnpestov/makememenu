@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { WeeklyMenuFull, DishFull } from '@make-me-menu/shared';
-import { Calendar, RefreshCw, RefreshCcw, Trash2 } from 'lucide-react';
+import { Calendar, RefreshCw, RefreshCcw, Trash2, ChevronRight, ChevronLeft } from 'lucide-react';
 import { DishCard } from '../components/DishCard';
 import { DishDetailsModal } from '../components/DishDetailsModal';
 import { ReplacementModal } from '../components/ReplacementModal';
+import './WeeklyMenuPage.css';
+
+type ActiveWeek = 'current' | 'next';
 
 function getCurrentWeekStart(): string {
   const d = new Date();
@@ -14,10 +17,17 @@ function getCurrentWeekStart(): string {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), diff)).toISOString();
 }
 
+function getNextWeekStart(): string {
+  const current = new Date(getCurrentWeekStart());
+  return new Date(current.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+}
+
 const dayNames = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
 
 export function WeeklyMenuPage() {
-  const [menu, setMenu] = useState<WeeklyMenuFull | null>(null);
+  const [activeWeek, setActiveWeek] = useState<ActiveWeek>('current');
+  const [currentMenu, setCurrentMenu] = useState<WeeklyMenuFull | null>(null);
+  const [nextMenu, setNextMenu] = useState<WeeklyMenuFull | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,19 +36,28 @@ export function WeeklyMenuPage() {
   const [loadingDishId, setLoadingDishId] = useState<number | null>(null);
   const [replacingItemId, setReplacingItemId] = useState<number | null>(null);
 
-  const currentWeekStart = getCurrentWeekStart();
+  const menu = activeWeek === 'current' ? currentMenu : nextMenu;
+  const weekStart = activeWeek === 'current' ? getCurrentWeekStart() : getNextWeekStart();
 
-  const loadMenu = async () => {
+  const loadMenus = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await api.menus.getCurrent();
-      setMenu(data);
-    } catch (err: any) {
-      if (err.message.includes('404') || err.message.includes('No current menu found')) {
-        setMenu(null);
-      } else {
-        setError(err.message);
+      const [curr, next] = await Promise.allSettled([
+        api.menus.getCurrent(),
+        api.menus.getNext(),
+      ]);
+
+      setCurrentMenu(curr.status === 'fulfilled' ? curr.value : null);
+      setNextMenu(next.status === 'fulfilled' ? next.value : null);
+
+      for (const result of [curr, next]) {
+        if (result.status === 'rejected') {
+          const msg: string = result.reason?.message ?? '';
+          if (!msg.includes('404') && !msg.includes('No') && !msg.includes('not found')) {
+            setError(msg);
+          }
+        }
       }
     } finally {
       setLoading(false);
@@ -46,15 +65,19 @@ export function WeeklyMenuPage() {
   };
 
   useEffect(() => {
-    loadMenu();
+    loadMenus();
   }, []);
 
   const handleGenerate = async () => {
     setGenerating(true);
     setError(null);
     try {
-      const data = await api.menus.generate({ weekStart: currentWeekStart });
-      setMenu(data);
+      const data = await api.menus.generate({ weekStart });
+      if (activeWeek === 'current') {
+        setCurrentMenu(data);
+      } else {
+        setNextMenu(data);
+      }
     } catch (err: any) {
       setError(err.message || 'Ошибка при генерации меню');
     } finally {
@@ -63,10 +86,16 @@ export function WeeklyMenuPage() {
   };
 
   const handleDeleteMenu = async () => {
-    if (!window.confirm('Вы уверены, что хотите удалить текущее меню на эту неделю?')) return;
+    const label = activeWeek === 'current' ? 'текущую неделю' : 'следующую неделю';
+    if (!window.confirm(`Вы уверены, что хотите удалить меню на ${label}?`)) return;
     try {
-      await api.menus.deleteCurrent();
-      setMenu(null);
+      if (activeWeek === 'current') {
+        await api.menus.deleteCurrent();
+        setCurrentMenu(null);
+      } else {
+        await api.menus.deleteNext();
+        setNextMenu(null);
+      }
     } catch (err: any) {
       setError(err.message || 'Ошибка при удалении меню');
     }
@@ -84,83 +113,43 @@ export function WeeklyMenuPage() {
     }
   };
 
-  // Group items by date for display
+  const handleWeekSwitch = (week: ActiveWeek) => {
+    setActiveWeek(week);
+    setError(null);
+    setReplacingItemId(null);
+  };
+
+  const weekRangeLabel = (start: string) => {
+    const from = new Date(start);
+    const to = new Date(new Date(start).getTime() + 6 * 24 * 60 * 60 * 1000);
+    return `${from.toLocaleDateString('ru-RU')} — ${to.toLocaleDateString('ru-RU')}`;
+  };
+
   const groupedItems = (() => {
     if (!menu) return [];
-    
-    // Create a map of date string -> items
     const map = new Map<string, typeof menu.items>();
     menu.items.forEach(item => {
-      // Date in ISO format from backend, keep only YYYY-MM-DD for grouping
-      const dateKey = item.date.split('T')[0];
-      if (!map.has(dateKey)) {
-        map.set(dateKey, []);
-      }
+      const dateKey = item.date.split('T')[0]!;
+      if (!map.has(dateKey)) map.set(dateKey, []);
       map.get(dateKey)!.push(item);
     });
-
-    // Convert map to sorted array
     return Array.from(map.entries())
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([dateStr, items]) => {
         const d = new Date(dateStr);
-        const dayOfWeek = dayNames[d.getDay()];
-        const breakfast = items.find(i => i.mealType === 'BREAKFAST');
-        const lunch = items.find(i => i.mealType === 'LUNCH');
-        
         return {
           dateStr,
-          dateLabel: `${dayOfWeek}, ${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}`,
-          breakfast,
-          lunch,
+          dateLabel: `${dayNames[d.getDay()]}, ${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}`,
+          breakfast: items.find(i => i.mealType === 'BREAKFAST'),
+          lunch: items.find(i => i.mealType === 'LUNCH'),
         };
       });
   })();
 
   if (loading) {
     return (
-      <div className="page-body" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-        <p style={{ color: 'var(--color-text-secondary)' }}>Загрузка меню...</p>
-      </div>
-    );
-  }
-
-  if (error && !menu) {
-    return (
-      <div className="page-body">
-        <div className="card" style={{ borderColor: 'var(--color-danger)' }}>
-          <h2 style={{ color: 'var(--color-danger)', marginBottom: '1rem' }}>Ошибка</h2>
-          <p>{error}</p>
-          <button className="btn btn-primary" onClick={loadMenu} style={{ marginTop: '1rem' }}>
-            Попробовать снова
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!menu) {
-    return (
-      <div className="page-body" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-        <div className="card" style={{ textAlign: 'center', padding: '3rem 2rem', maxWidth: '500px' }}>
-          <Calendar size={48} style={{ margin: '0 auto 1rem', color: 'var(--color-text-secondary)' }} />
-          <h2 style={{ fontSize: 'var(--font-size-xl)', marginBottom: '1rem' }}>Меню не составлено</h2>
-          <p style={{ color: 'var(--color-text-secondary)', marginBottom: '2rem' }}>
-            На текущую неделю меню ещё не было сгенерировано. Хотите сгенерировать его сейчас на основе ваших настроек?
-          </p>
-          
-          {error && <p style={{ color: 'var(--color-danger)', marginBottom: '1rem' }}>{error}</p>}
-          
-          <button 
-            className="btn btn-primary" 
-            onClick={handleGenerate} 
-            disabled={generating}
-            style={{ padding: '0.75rem 2rem', fontSize: 'var(--font-size-base)' }}
-          >
-            {generating ? <RefreshCw className="animate-spin" size={20} /> : <Calendar size={20} />}
-            {generating ? 'Генерация...' : 'Сгенерировать меню'}
-          </button>
-        </div>
+      <div className="page-body weekly-menu__loading">
+        <p className="weekly-menu__loading-text">Загрузка меню...</p>
       </div>
     );
   }
@@ -170,108 +159,139 @@ export function WeeklyMenuPage() {
       <header className="page-header">
         <div>
           <h1 className="page-title">Меню на неделю</h1>
-          <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginTop: '0.25rem' }}>
-            {new Date(menu.weekStart).toLocaleDateString('ru-RU')} — {new Date(new Date(menu.weekStart).getTime() + 6 * 24 * 60 * 60 * 1000).toLocaleDateString('ru-RU')}
-          </p>
+          {menu && (
+            <p className="weekly-menu__subtitle">{weekRangeLabel(menu.weekStart)}</p>
+          )}
         </div>
-        <button 
-          className="btn btn-secondary" 
-          onClick={handleDeleteMenu}
-          title="Сбросить текущее меню и сгенерировать заново"
-          style={{ color: 'var(--color-danger)', borderColor: 'var(--color-danger)' }}
-        >
-          <Trash2 size={18} />
-          <span>Сбросить меню</span>
-        </button>
+        {menu && (
+          <button
+            className="btn btn-secondary"
+            onClick={handleDeleteMenu}
+            title="Сбросить меню"
+            style={{ color: 'var(--color-danger)', borderColor: 'var(--color-danger)' }}
+          >
+            <Trash2 size={18} />
+            <span>Сбросить меню</span>
+          </button>
+        )}
       </header>
-      
-      <div className="page-body">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {groupedItems.map(day => (
-            <div key={day.dateStr}>
-              <h3 style={{ 
-                fontSize: 'var(--font-size-lg)', 
-                fontWeight: 600, 
-                marginBottom: '0.75rem',
-                borderBottom: '1px solid var(--color-border)',
-                paddingBottom: '0.5rem',
-                color: 'var(--color-text-primary)'
-              }}>
-                {day.dateLabel}
-              </h3>
-              
-              <div className="menu-day-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-                {day.breakfast && (
-                  <DishCard 
-                    dish={day.breakfast.dish} 
-                    mealTypeLabel="Завтрак" 
-                    onClick={() => handleViewDish(day.breakfast!.dish.id)}
-                    actionButton={
-                      <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: 'var(--font-size-xs)' }} onClick={() => setReplacingItemId(day.breakfast!.id)}>
-                        <RefreshCcw size={14} /> Заменить
-                      </button>
-                    }
-                  />
-                )}
-                
-                {day.lunch && (
-                  <DishCard 
-                    dish={day.lunch.dish} 
-                    mealTypeLabel="Обед и ужин" 
-                    onClick={() => handleViewDish(day.lunch!.dish.id)}
-                    actionButton={
-                      <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: 'var(--font-size-xs)' }} onClick={() => setReplacingItemId(day.lunch!.id)}>
-                        <RefreshCcw size={14} /> Заменить
-                      </button>
-                    }
-                  />
-                )}
-              </div>
-            </div>
-          ))}
+
+      <div className="weekly-menu__switcher">
+        <div className="weekly-menu__switcher-tabs">
+          <button
+            className={`weekly-menu__switcher-btn${activeWeek === 'current' ? ' weekly-menu__switcher-btn--active' : ''}`}
+            onClick={() => handleWeekSwitch('current')}
+          >
+            <ChevronLeft size={14} />
+            Текущая неделя
+            {currentMenu && <span className="weekly-menu__switcher-dot" />}
+          </button>
+          <button
+            className={`weekly-menu__switcher-btn${activeWeek === 'next' ? ' weekly-menu__switcher-btn--active' : ''}`}
+            onClick={() => handleWeekSwitch('next')}
+          >
+            Следующая неделя
+            {nextMenu && <span className="weekly-menu__switcher-dot" />}
+            <ChevronRight size={14} />
+          </button>
         </div>
       </div>
 
+      <div className="page-body">
+        {error && (
+          <div className="card weekly-menu__error">
+            <p className="weekly-menu__error-text">{error}</p>
+          </div>
+        )}
+
+        {!menu ? (
+          <div className="weekly-menu__empty-wrap">
+            <div className="card weekly-menu__empty">
+              <Calendar className="weekly-menu__empty-icon" size={48} />
+              <h2 className="weekly-menu__empty-title">Меню не составлено</h2>
+              <p className="weekly-menu__empty-dates">{weekRangeLabel(weekStart)}</p>
+              <p className="weekly-menu__empty-text">
+                Меню ещё не было сгенерировано. Хотите сгенерировать его сейчас?
+              </p>
+              <button
+                className="btn btn-primary weekly-menu__empty-btn"
+                onClick={handleGenerate}
+                disabled={generating}
+              >
+                {generating
+                  ? <RefreshCw className="weekly-menu__spinner" size={20} />
+                  : <Calendar size={20} />}
+                {generating ? 'Генерация...' : 'Сгенерировать меню'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="weekly-menu__days">
+            {groupedItems.map(day => (
+              <div key={day.dateStr} className="weekly-menu__day">
+                <h3 className="weekly-menu__day-title">{day.dateLabel}</h3>
+                <div className="weekly-menu__day-grid">
+                  {day.breakfast && (
+                    <DishCard
+                      dish={day.breakfast.dish}
+                      mealTypeLabel="Завтрак"
+                      onClick={() => handleViewDish(day.breakfast!.dish.id)}
+                      actionButton={
+                        <button
+                          className="btn btn-secondary"
+                          style={{ padding: '0.25rem 0.5rem', fontSize: 'var(--font-size-xs)' }}
+                          onClick={() => setReplacingItemId(day.breakfast!.id)}
+                        >
+                          <RefreshCcw size={14} /> Заменить
+                        </button>
+                      }
+                    />
+                  )}
+                  {day.lunch && (
+                    <DishCard
+                      dish={day.lunch.dish}
+                      mealTypeLabel="Обед и ужин"
+                      onClick={() => handleViewDish(day.lunch!.dish.id)}
+                      actionButton={
+                        <button
+                          className="btn btn-secondary"
+                          style={{ padding: '0.25rem 0.5rem', fontSize: 'var(--font-size-xs)' }}
+                          onClick={() => setReplacingItemId(day.lunch!.id)}
+                        >
+                          <RefreshCcw size={14} /> Заменить
+                        </button>
+                      }
+                    />
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {selectedDish && (
-        <DishDetailsModal 
-          dish={selectedDish} 
-          onClose={() => setSelectedDish(null)} 
-        />
+        <DishDetailsModal dish={selectedDish} onClose={() => setSelectedDish(null)} />
       )}
 
-      {/* Loading overlay for dish fetch */}
       {loadingDishId && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(255,255,255,0.7)',
-          display: 'flex', justifyContent: 'center', alignItems: 'center',
-          zIndex: 2000
-        }}>
-          <p style={{ fontWeight: 500 }}>Загрузка рецепта...</p>
+        <div className="weekly-menu__dish-overlay">
+          <p className="weekly-menu__dish-overlay-text">Загрузка рецепта...</p>
         </div>
       )}
 
       {replacingItemId && menu && (
-        <ReplacementModal 
-          menuId={menu.id} 
-          itemId={replacingItemId} 
-          onClose={() => setReplacingItemId(null)} 
+        <ReplacementModal
+          menuId={menu.id}
+          itemId={replacingItemId}
+          onClose={() => setReplacingItemId(null)}
           onSuccess={(newMenu) => {
-            setMenu(newMenu);
+            if (activeWeek === 'current') setCurrentMenu(newMenu);
+            else setNextMenu(newMenu);
             setReplacingItemId(null);
-          }} 
+          }}
         />
       )}
-
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        .animate-spin {
-          animation: spin 1s linear infinite;
-        }
-      `}</style>
     </>
   );
 }

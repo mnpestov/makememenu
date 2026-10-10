@@ -1,0 +1,111 @@
+/* ─── catalog ──────────────────────────────────────────────────────────────── */
+
+/* Search */
+.catalog__search-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin-bottom: 1.25rem;
+}
+
+.catalog__search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+
+.catalog__search-input {
+  width: 100%;
+  padding: 0.625rem 1rem 0.625rem 2.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  font-size: var(--font-size-base);
+  background-color: var(--color-bg-secondary);
+}
+
+/* Error */
+.catalog__error {
+  border-color: var(--color-danger);
+  margin-bottom: 1rem;
+}
+
+.catalog__error-text {
+  color: var(--color-danger);
+}
+
+/* Empty */
+.catalog__empty {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.catalog__empty-text {
+  color: var(--color-text-secondary);
+}
+
+/* Grid */
+.catalog__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+/* Dish card */
+.catalog__dish {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.catalog__dish-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.catalog__dish-name {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.catalog__dish-category {
+  display: inline-block;
+  background-color: var(--color-bg-primary);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.catalog__dish-meta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.catalog__dish-actions {
+  margin-top: auto;
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.catalog__dish-btn {
+  flex: 1;
+}
+
+.catalog__dish-btn--danger {
+  color: var(--color-danger);
+}
+
+@media (max-width: 768px) {
+  .catalog__grid {
+    grid-template-columns: 1fr;
+  }
+}

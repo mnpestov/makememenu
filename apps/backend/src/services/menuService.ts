@@ -41,6 +41,11 @@ function getCurrentWeekStart(): Date {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), diff));
 }
 
+function getNextWeekStart(): Date {
+  const current = getCurrentWeekStart();
+  return new Date(current.getTime() + 7 * 24 * 60 * 60 * 1000);
+}
+
 export class MenuService {
   /**
    * Automatically updates CookingHistory based on past MenuItems without history.
@@ -145,6 +150,23 @@ export class MenuService {
 
   async deleteCurrentMenu(): Promise<void> {
     const weekStart = getCurrentWeekStart();
+    await prisma.weeklyMenu.deleteMany({
+      where: { weekStart }
+    });
+  }
+
+  async getNextMenu(): Promise<WeeklyMenuFull | null> {
+    const weekStart = getNextWeekStart();
+    const next = await prisma.weeklyMenu.findUnique({
+      where: { weekStart }
+    });
+
+    if (!next) return null;
+    return this.getById(next.id);
+  }
+
+  async deleteNextMenu(): Promise<void> {
+    const weekStart = getNextWeekStart();
     await prisma.weeklyMenu.deleteMany({
       where: { weekStart }
     });

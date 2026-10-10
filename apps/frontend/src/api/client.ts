@@ -160,6 +160,8 @@ export const api = {
   menus: {
     getCurrent: () => fetchJson<WeeklyMenuFull>('/menus/current'),
     deleteCurrent: () => fetchJson<void>('/menus/current', { method: 'DELETE' }),
+    getNext: () => fetchJson<WeeklyMenuFull>('/menus/next'),
+    deleteNext: () => fetchJson<void>('/menus/next', { method: 'DELETE' }),
     generate: (data: GenerateMenuDto) => fetchJson<WeeklyMenuFull>('/menus/generate', {
       method: 'POST',
       body: JSON.stringify(data),
