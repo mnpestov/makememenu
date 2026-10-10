@@ -13,7 +13,7 @@ export interface Category {
 export interface Ingredient {
   id: number;
   name: string;
-  pyaterochkaSku?: string | null;
+
   packAmount?: number | null;
   packPrice?: number | null;
   createdAt: string;

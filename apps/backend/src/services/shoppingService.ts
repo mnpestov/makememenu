@@ -125,7 +125,7 @@ export class ShoppingService {
       ingredient: {
         id: item.ingredient.id,
         name: item.ingredient.name,
-        pyaterochkaSku: item.ingredient.pyaterochkaSku,
+
         packAmount: item.ingredient.packAmount,
         packPrice: item.ingredient.packPrice,
         createdAt: item.ingredient.createdAt.toISOString(),

@@ -37,7 +37,7 @@ export class IngredientService {
     const ingredient = await prisma.ingredient.update({
       where: { id },
       data: {
-        pyaterochkaSku: data.pyaterochkaSku,
+
         packAmount: data.packAmount,
         packPrice: data.packPrice,
       }

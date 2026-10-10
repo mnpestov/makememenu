@@ -56,7 +56,7 @@ model Category {
 model Ingredient {
   id              Int              @id @default(autoincrement())
   name            String           @unique
-  pyaterochkaSku  String?
+
   packAmount      Float?
   packPrice       Float?
   createdAt       DateTime         @default(now())

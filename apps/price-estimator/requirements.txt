@@ -1,8 +1,0 @@
-fastapi
-uvicorn
-pydantic
-aiohttp
-httpx
-pyaterochka_api==0.2.2
-pytest
-selectolax<1.0

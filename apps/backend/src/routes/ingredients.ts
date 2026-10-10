@@ -23,16 +23,6 @@ router.patch('/:id', catchAsync(async (req, res) => {
   res.json(ingredient);
 }));
 
-router.get('/search-store', catchAsync(async (req, res) => {
-  const q = req.query.q as string;
-  try {
-    const response = await fetch(`http://localhost:8000/search?q=${encodeURIComponent(q)}`);
-    if (!response.ok) throw new Error('Store search failed');
-    const data = await response.json();
-    res.json(data);
-  } catch (error: any) {
-    res.status(503).json({ error: 'SERVICE_UNAVAILABLE', message: error.message });
-  }
-}));
+
 
 export default router;
