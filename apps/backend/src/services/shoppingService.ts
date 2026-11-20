@@ -35,6 +35,9 @@ export class ShoppingService {
       dish: {
         id: item.dish.id,
         name: item.dish.name,
+        status: item.dish.status,
+        rating: item.dish.rating,
+        reviewComment: item.dish.reviewComment,
         category: item.dish.category ? {
           id: item.dish.category.id,
           name: item.dish.category.name,
@@ -56,6 +59,8 @@ export class ShoppingService {
           },
           amount: di.amount,
           unit: di.unit,
+          scaling: di.scaling,
+          note: di.note,
         }))
       }
     }));

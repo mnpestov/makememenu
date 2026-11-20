@@ -34,6 +34,12 @@ export const Unit = {
   TEASPOON: 'TEASPOON',
   TABLESPOON: 'TABLESPOON',
   CUP: 'CUP',
+  PACK: 'PACK',
+  CLOVE: 'CLOVE',
+  PINCH: 'PINCH',
+  SPRIG: 'SPRIG',
+  SLICE: 'SLICE',
+  TO_TASTE: 'TO_TASTE',
 } as const;
 
 export type Unit = (typeof Unit)[keyof typeof Unit];
@@ -47,6 +53,12 @@ export const UNIT_LABELS: Record<Unit, string> = {
   TEASPOON: 'ч.л.',
   TABLESPOON: 'ст.л.',
   CUP: 'чашка',
+  PACK: 'упак.',
+  CLOVE: 'зубч.',
+  PINCH: 'щеп.',
+  SPRIG: 'вет.',
+  SLICE: 'ломт.',
+  TO_TASTE: 'по вкусу',
 };
 
 /**
@@ -129,3 +141,13 @@ export const COOK_PERSON_LABELS: Record<CookPerson, string> = {
   MISHA: 'Миша',
 };
 
+
+export const DishStatus = { TRY: 'TRY', FAVORITE: 'FAVORITE', REJECTED: 'REJECTED' } as const;
+export type DishStatus = (typeof DishStatus)[keyof typeof DishStatus];
+export const DISH_STATUS_LABELS: Record<DishStatus, string> = {
+  TRY: 'Хочу попробовать', FAVORITE: 'Постоянное меню', REJECTED: 'Отклонено',
+};
+export const NutritionBasis = { PER_SERVING: 'PER_SERVING', PER_100G: 'PER_100G' } as const;
+export type NutritionBasis = (typeof NutritionBasis)[keyof typeof NutritionBasis];
+export const IngredientScaling = { LINEAR: 'LINEAR', DAMPED: 'DAMPED', FIXED: 'FIXED' } as const;
+export type IngredientScaling = (typeof IngredientScaling)[keyof typeof IngredientScaling];

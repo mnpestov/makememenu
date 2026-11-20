@@ -4,7 +4,7 @@ import { scaleIngredient } from './ingredientScaler';
 
 export interface ShoppingItemDraft {
   ingredient: Ingredient;
-  totalAmount: number;
+  totalAmount: number | null;
   unit: Unit;
   neededDates: string[]; // ISO date strings
 }
@@ -21,14 +21,15 @@ export function buildShoppingList(
     const dateStr = item.date;
 
     for (const dishIngredient of dish.ingredients) {
-      const scaledAmount = scaleIngredient(dishIngredient.amount, dish.servings, targetServings);
-      const normalized = normalizeUnit(scaledAmount, dishIngredient.unit);
+      const normalized = dishIngredient.amount === null
+        ? { amount: null, unit: dishIngredient.unit }
+        : normalizeUnit(scaleIngredient(dishIngredient.amount, dish.servings, targetServings, dishIngredient.scaling), dishIngredient.unit);
       
       const key = `${dishIngredient.ingredient.id}_${normalized.unit}`;
       
       const existing = map.get(key);
       if (existing) {
-        existing.totalAmount += normalized.amount;
+        if (existing.totalAmount !== null && normalized.amount !== null) existing.totalAmount += normalized.amount;
         if (!existing.neededDates.includes(dateStr)) {
           existing.neededDates.push(dateStr);
         }

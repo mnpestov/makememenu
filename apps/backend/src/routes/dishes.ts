@@ -1,15 +1,33 @@
 import { Router } from 'express';
+import { importUnitools } from '../services/recipeImportService';
 import { dishService } from '../services/dishService';
 import { catchAsync } from '../utils/catchAsync';
 import { validateBody } from '../middleware/validate';
-import { CreateDishSchema, UpdateDishSchema } from '@make-me-menu/shared';
+import { CreateDishSchema, UpdateDishSchema, ReviewDishSchema } from '@make-me-menu/shared';
+import { ValidationError } from '../utils/errors';
 
 import type { Router as ExpressRouter } from 'express';
 const router: ExpressRouter = Router();
 
+router.param('id', (_req, _res, next, value: string) => {
+  if (!/^[1-9]\d*$/.test(value) || !Number.isSafeInteger(Number(value))) {
+    next(new ValidationError('Некорректный ID блюда'));
+    return;
+  }
+  next();
+});
+
 router.get('/', catchAsync(async (_req, res) => {
   const dishes = await dishService.getAll();
   res.json(dishes);
+}));
+
+router.post('/import/unitools', catchAsync(async (_req, res) => {
+  res.json(await importUnitools());
+}));
+
+router.post('/:id/review', validateBody(ReviewDishSchema), catchAsync(async (req, res) => {
+  res.json(await dishService.review(parseInt(req.params.id!, 10), req.body));
 }));
 
 router.get('/:id', catchAsync(async (req, res) => {

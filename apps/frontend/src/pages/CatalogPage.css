@@ -109,3 +109,8 @@
     grid-template-columns: 1fr;
   }
 }
+
+.recipe-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.catalog__hint { margin: 1rem 0; color: var(--color-text-secondary); }
+.catalog__dish-actions { flex-wrap: wrap; }
+.catalog__dish-btn { min-width: 110px; }

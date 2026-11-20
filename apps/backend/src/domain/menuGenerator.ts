@@ -1,4 +1,4 @@
-import { DishSummary, DayOfWeek, Difficulty, MealType, Cook, CookPerson } from '@make-me-menu/shared';
+import { DishSummary, DayOfWeek, Difficulty, MealType, Cook, CookPerson, DishStatus } from '@make-me-menu/shared';
 import { calculateWeights, weightedRandomSelect } from './historyWeighter';
 
 export interface DayConfig {
@@ -50,8 +50,8 @@ export function generateMenu(context: GenerationContext): GeneratedMenuItem[] {
   const result: GeneratedMenuItem[] = [];
   
   // Separate pools
-  const breakfastDishes = context.dishes.filter(d => d.forBreakfast);
-  const lunchDishes = context.dishes.filter(d => d.forLunch);
+  const breakfastDishes = context.dishes.filter(d => d.status !== DishStatus.TRY && d.status !== DishStatus.REJECTED && d.forBreakfast);
+  const lunchDishes = context.dishes.filter(d => d.status !== DishStatus.TRY && d.status !== DishStatus.REJECTED && d.forLunch);
   
   const rng = context.randomGenerator;
   const currentDateStr = context.currentDateStr;

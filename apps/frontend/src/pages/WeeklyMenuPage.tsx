@@ -271,7 +271,7 @@ export function WeeklyMenuPage() {
       </div>
 
       {selectedDish && (
-        <DishDetailsModal dish={selectedDish} onClose={() => setSelectedDish(null)} />
+        <DishDetailsModal key={selectedDish.id} dish={selectedDish} onClose={() => setSelectedDish(null)} onUpdated={updated => { setSelectedDish(updated); void loadMenus(); }} />
       )}
 
       {loadingDishId && (

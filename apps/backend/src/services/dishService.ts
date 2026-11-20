@@ -1,5 +1,5 @@
 import prisma from '../db/prismaClient';
-import { CreateDishDto, UpdateDishDto, DishSummary, DishFull } from '@make-me-menu/shared';
+import { CreateDishDto, UpdateDishDto, DishSummary, DishFull, ReviewDishDto } from '@make-me-menu/shared';
 import { NotFoundError, ConflictError } from '../utils/errors';
 
 export class DishService {
@@ -7,6 +7,9 @@ export class DishService {
     return {
       id: dish.id,
       name: dish.name,
+      status: dish.status,
+      rating: dish.rating,
+      reviewComment: dish.reviewComment,
       category: dish.category ? {
         id: dish.category.id,
         name: dish.category.name,
@@ -26,6 +29,13 @@ export class DishService {
   private mapToFull(dish: any): DishFull {
     return {
       ...this.mapToSummary(dish),
+      nutritionBasis: dish.nutritionBasis,
+      source: dish.source,
+      sourceId: dish.sourceId,
+      sourceUrl: dish.sourceUrl,
+      sourceLicense: dish.sourceLicense,
+      prepMinutes: dish.prepMinutes,
+      cookMinutes: dish.cookMinutes,
       recipe: dish.recipe,
       calories: dish.calories,
       protein: dish.protein,
@@ -39,6 +49,8 @@ export class DishService {
         },
         amount: di.amount,
         unit: di.unit,
+        scaling: di.scaling,
+        note: di.note,
       })),
     };
   }
@@ -87,6 +99,7 @@ export class DishService {
         forBreakfast: data.forBreakfast,
         forLunch: data.forLunch,
         recipe: data.recipe ?? null,
+        nutritionBasis: data.nutritionBasis,
         calories: data.calories ?? null,
         protein: data.protein ?? null,
         fat: data.fat ?? null,
@@ -96,6 +109,8 @@ export class DishService {
             ingredientId: ing.ingredientId,
             amount: ing.amount,
             unit: ing.unit,
+            scaling: ing.scaling,
+            note: ing.note ?? null,
           }))
         }
       },
@@ -130,6 +145,7 @@ export class DishService {
         forBreakfast: data.forBreakfast,
         forLunch: data.forLunch,
         recipe: data.recipe ?? null,
+        nutritionBasis: data.nutritionBasis,
         calories: data.calories ?? null,
         protein: data.protein ?? null,
         fat: data.fat ?? null,
@@ -141,6 +157,8 @@ export class DishService {
             ingredientId: ing.ingredientId,
             amount: ing.amount,
             unit: ing.unit,
+            scaling: ing.scaling,
+            note: ing.note ?? null,
           }))
         }
       },
@@ -155,15 +173,37 @@ export class DishService {
     return this.mapToFull(updated);
   }
 
+  async review(id: number, data: ReviewDishDto): Promise<DishFull> {
+    const existing = await prisma.dish.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundError('Блюдо не найдено');
+    const cookedAt = new Date();
+    await prisma.$transaction(async tx => {
+      await tx.cookingHistory.create({ data: { dishId: id, cookedAt } });
+      await tx.dish.update({ where: { id }, data: {
+        rating: data.rating, reviewComment: data.comment || null,
+        status: data.status, lastCookedAt: cookedAt,
+      } });
+    });
+    return this.getById(id);
+  }
+
   async delete(id: number): Promise<void> {
     const existing = await prisma.dish.findUnique({ where: { id } });
     if (!existing) throw new NotFoundError('Dish not found');
 
     try {
-      await prisma.dish.delete({ where: { id } });
+      await prisma.$transaction(async tx => {
+        if (existing.source && existing.sourceId) {
+          await tx.recipeImportExclusion.upsert({
+            where: { source_sourceId: { source: existing.source, sourceId: existing.sourceId } },
+            create: { source: existing.source, sourceId: existing.sourceId }, update: {},
+          });
+        }
+        await tx.dish.delete({ where: { id } });
+      });
     } catch (err: any) {
       if (err.code === 'P2003') {
-        throw new ConflictError('Невозможно удалить блюдо, так как оно уже используется в сгенерированном меню.');
+        throw new ConflictError('Блюдо используется в меню. После приготовления выберите «Отклонено» в оценке: оно сохранится в истории и больше не попадёт в подбор.');
       }
       throw err;
     }

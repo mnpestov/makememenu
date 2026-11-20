@@ -15,6 +15,7 @@ export function normalizeUnit(amount: number, unit: Unit): { amount: number; uni
     case Unit.GRAM:
     case Unit.MILLILITER:
     case Unit.PIECE:
+    case Unit.PACK:
     default:
       return { amount, unit };
   }
@@ -44,6 +45,8 @@ export function formatUnitForDisplay(amount: number, unit: Unit): string {
       return `${Number(amount.toFixed(1))} ст.л.`;
     case Unit.CUP:
       return `${Number(amount.toFixed(1))} чашка`;
+    case Unit.PACK:
+      return `${Number(amount.toFixed(1))} упак.`;
     default:
       return `${amount} ${unit}`;
   }

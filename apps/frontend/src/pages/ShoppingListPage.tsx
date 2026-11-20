@@ -1,22 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
-import type { ShoppingItem } from '@make-me-menu/shared';
+import { UNIT_LABELS, Unit, type ShoppingItem } from '@make-me-menu/shared';
 import { ShoppingCart, Calendar, CheckCircle2, Circle } from 'lucide-react';
 import './ShoppingListPage.css';
 
 const dayNamesShort = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
 
-function formatQuantity(amount: number, unit: string): string {
-  if (unit === 'GRAM' && amount >= 1000) return `${Number((amount / 1000).toFixed(2))} кг`;
-  if (unit === 'GRAM') return `${Number(amount.toFixed(0))} гр`;
-  if (unit === 'MILLILITER' && amount >= 1000) return `${Number((amount / 1000).toFixed(2))} л`;
-  if (unit === 'MILLILITER') return `${Number(amount.toFixed(0))} мл`;
-  if (unit === 'PIECE') return `${Number(amount.toFixed(1))} шт`;
-  if (unit === 'TEASPOON') return `${Number(amount.toFixed(1))} ч.л.`;
-  if (unit === 'TABLESPOON') return `${Number(amount.toFixed(1))} ст.л.`;
-  if (unit === 'CUP') return `${Number(amount.toFixed(1))} чашка`;
-  return `${amount} ${unit}`;
+function formatQuantity(amount: number | null, unit: Unit): string {
+  if (unit === Unit.TO_TASTE || amount === null) return 'по вкусу';
+  if (unit === Unit.GRAM && amount >= 1000) return `${Number((amount / 1000).toFixed(2))} кг`;
+  if (unit === Unit.MILLILITER && amount >= 1000) return `${Number((amount / 1000).toFixed(2))} л`;
+  return `${Number(amount.toFixed(1))} ${UNIT_LABELS[unit]}`;
 }
 
 function formatDates(dates: { neededAt: string }[]): string {

@@ -1,16 +1,42 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api/client';
-import type { DishSummary } from '@make-me-menu/shared';
-import { COOK_LABELS } from '@make-me-menu/shared';
+import type { DishSummary, DishFull } from '@make-me-menu/shared';
+import { COOK_LABELS, DishStatus, DISH_STATUS_LABELS } from '@make-me-menu/shared';
 import { Search, Plus } from 'lucide-react';
 import { DishFormModal } from '../components/DishFormModal';
 import './CatalogPage.css';
+import { DishDetailsModal } from '../components/DishDetailsModal';
 
 export function CatalogPage() {
   const [dishes, setDishes] = useState<DishSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeStatus, setActiveStatus] = useState<DishStatus>(DishStatus.FAVORITE);
+  const [selectedDish, setSelectedDish] = useState<DishFull | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const handleImport = async () => {
+    setImporting(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const result = await api.dishes.importUnitools();
+      setNotice(`Добавлено: ${result.imported}. Уже импортировано или удалено ранее: ${result.skipped}. Новые рецепты — в «Хочу попробовать».`);
+      setActiveStatus(DishStatus.TRY);
+      await loadDishes();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось импортировать рецепты');
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const handleView = async (id: number) => {
+    try { setSelectedDish(await api.dishes.getById(id)); }
+    catch (err) { setError(err instanceof Error ? err.message : 'Не удалось открыть рецепт'); }
+  };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingDishId, setEditingDishId] = useState<number | null>(null);
@@ -30,7 +56,7 @@ export function CatalogPage() {
 
   useEffect(() => { loadDishes(); }, []);
 
-  const filteredDishes = dishes.filter(d =>
+  const filteredDishes = dishes.filter(d => d.status === activeStatus).filter(d =>
     d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (d.category?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
     (COOK_LABELS[d.cook] || '').toLowerCase().includes(searchQuery.toLowerCase())
@@ -58,13 +84,28 @@ export function CatalogPage() {
     <>
       <header className="page-header">
         <h1 className="page-title">Каталог блюд</h1>
+        <div className="recipe-actions">
+          <button className="btn btn-secondary" disabled={importing} onClick={handleImport}>
+            {importing ? 'Импорт рецептов…' : 'Импортировать UniTools'}
+          </button>
         <button className="btn btn-primary" onClick={handleCreate}>
           <Plus size={18} />
           <span>Добавить блюдо</span>
         </button>
+        </div>
       </header>
 
       <div className="page-body">
+        <div className="recipe-actions" role="group" aria-label="Разделы каталога">
+          {Object.values(DishStatus).map(status => (
+            <button key={status} className={`btn ${activeStatus === status ? 'btn-primary' : 'btn-secondary'}`}
+              aria-pressed={activeStatus === status} onClick={() => setActiveStatus(status)}>
+              {DISH_STATUS_LABELS[status]} ({dishes.filter(d => d.status === status).length})
+            </button>
+          ))}
+        </div>
+        <p className="catalog__hint">Недельное меню генерируется из постоянных блюд. Рецепт на пробу можно выбрать через замену блюда в меню.</p>
+        {notice && <p role="status" className="catalog__hint">{notice}</p>}
         <div className="catalog__search-wrap">
           <Search className="catalog__search-icon" size={18} />
           <input
@@ -100,6 +141,7 @@ export function CatalogPage() {
                 </div>
 
                 <div className="catalog__dish-meta">
+                  {dish.rating !== null && <p><strong>Оценка семьи:</strong> {dish.rating}/5</p>}
                   <p><strong>Сложность:</strong> {dish.difficulty}</p>
                   <p><strong>Повар:</strong> {COOK_LABELS[dish.cook] || 'Юля и Миша'}</p>
                   <p>
@@ -112,6 +154,7 @@ export function CatalogPage() {
                 </div>
 
                 <div className="catalog__dish-actions">
+                  <button className="btn btn-primary catalog__dish-btn" onClick={() => handleView(dish.id)}>Рецепт и оценка</button>
                   <button
                     className="btn btn-secondary catalog__dish-btn"
                     onClick={() => handleEdit(dish.id)}
@@ -131,6 +174,8 @@ export function CatalogPage() {
         )}
       </div>
 
+      {selectedDish && <DishDetailsModal key={selectedDish.id} dish={selectedDish}
+        onClose={() => setSelectedDish(null)} onUpdated={() => { void loadDishes(); }} />}
       {isModalOpen && (
         <DishFormModal dishId={editingDishId} onClose={handleModalClose} />
       )}

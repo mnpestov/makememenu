@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Difficulty, Unit, DayOfWeek, Cook, CookPerson } from '../enums/index';
+import { Difficulty, Unit, DayOfWeek, Cook, CookPerson, DishStatus, NutritionBasis, IngredientScaling } from '../enums/index';
 
 // ─── Category ────────────────────────────────────────────────────────────────
 
@@ -29,8 +29,12 @@ export type UpdateIngredientDto = z.infer<typeof UpdateIngredientSchema>;
 
 export const DishIngredientInputSchema = z.object({
   ingredientId: z.number().int().positive(),
-  amount: z.number().positive(),
-  unit: z.enum([Unit.GRAM, Unit.KILOGRAM, Unit.MILLILITER, Unit.LITER, Unit.PIECE, Unit.TEASPOON, Unit.TABLESPOON, Unit.CUP]),
+  amount: z.number().finite().positive().nullable(),
+  unit: z.nativeEnum(Unit),
+  scaling: z.nativeEnum(IngredientScaling).default(IngredientScaling.LINEAR),
+  note: z.string().max(1000).nullable().optional(),
+}).refine(data => data.unit === Unit.TO_TASTE ? data.amount === null : data.amount !== null, {
+  message: 'Укажите количество; для «по вкусу» количество должно быть пустым',
 });
 
 export type DishIngredientInput = z.infer<typeof DishIngredientInputSchema>;
@@ -44,6 +48,7 @@ export const CreateDishSchema = z.object({
   forBreakfast: z.boolean(),
   forLunch: z.boolean(),
   recipe: z.string().max(10000).nullable().optional(),
+  nutritionBasis: z.nativeEnum(NutritionBasis).default(NutritionBasis.PER_SERVING),
   calories: z.number().nonnegative().nullable().optional(),
   protein: z.number().nonnegative().nullable().optional(),
   fat: z.number().nonnegative().nullable().optional(),
@@ -115,3 +120,10 @@ export const UpdateSettingsSchema = z.object({
 });
 
 export type UpdateSettingsDto = z.infer<typeof UpdateSettingsSchema>;
+
+export const ReviewDishSchema = z.object({
+  rating: z.number().int().min(1).max(5),
+  status: z.nativeEnum(DishStatus),
+  comment: z.string().trim().max(2000).default(''),
+});
+export type ReviewDishDto = z.infer<typeof ReviewDishSchema>;

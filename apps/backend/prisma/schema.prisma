@@ -38,6 +38,29 @@ enum Unit {
   TEASPOON
   TABLESPOON
   CUP
+  PACK
+  CLOVE
+  PINCH
+  SPRIG
+  SLICE
+  TO_TASTE
+}
+
+enum DishStatus {
+  TRY
+  FAVORITE
+  REJECTED
+}
+
+enum NutritionBasis {
+  PER_100G
+  PER_SERVING
+}
+
+enum IngredientScaling {
+  LINEAR
+  DAMPED
+  FIXED
 }
 
 // ─── Reference Tables ─────────────────────────────────────────────────────────
@@ -75,7 +98,18 @@ model Dish {
   /// Number of servings in the base recipe. Used to compute scale factor.
   servings     Int
   recipe       String?
-  /// КБЖУ per 100g — entered manually by user. Not computed by the app.
+  status        DishStatus @default(FAVORITE)
+  rating        Int?
+  reviewComment String?
+  source        String?
+  sourceId      String?
+  sourceUrl     String?
+  sourceLicense String?
+  sourceVersion String?
+  prepMinutes   Int?
+  cookMinutes   Int?
+  /// Existing recipes retain PER_100G; imported/new recipes specify their basis.
+  nutritionBasis NutritionBasis @default(PER_100G)
   calories     Float?
   protein      Float?
   fat          Float?
@@ -83,7 +117,7 @@ model Dish {
   forBreakfast Boolean  @default(false)
   forLunch     Boolean  @default(false)
   /// Cache of the last CookingHistory.cookedAt for this dish.
-  /// Updated by syncCookingHistory(). Source of truth: CookingHistory table. (ADR-014)
+  /// Updated when cooking is confirmed. Source of truth: CookingHistory.
   lastCookedAt DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -92,6 +126,8 @@ model Dish {
   ingredients    DishIngredient[]
   menuItems      MenuItem[]
   cookingHistory CookingHistory[]
+
+  @@unique([source, sourceId])
 }
 
 /// Ingredient entry within a dish recipe.
@@ -100,14 +136,15 @@ model DishIngredient {
   id           Int        @id @default(autoincrement())
   dishId       Int
   ingredientId Int
-  amount       Float
+  amount       Float?
+  scaling      IngredientScaling @default(LINEAR)
+  note         String?
   unit         Unit
 
   dish       Dish       @relation(fields: [dishId], references: [id], onDelete: Cascade)
   ingredient Ingredient @relation(fields: [ingredientId], references: [id])
 
-  /// One ingredient appears once per dish (same unit semantics enforced by domain).
-  @@unique([dishId, ingredientId])
+  // Separate rows preserve uses in different recipe components and different units.
 }
 
 // ─── Weekly Menu ─────────────────────────────────────────────────────────────
@@ -153,7 +190,7 @@ model ShoppingItem {
   menuId       Int
   ingredientId Int
   /// Total aggregated amount in base unit.
-  totalAmount  Float
+  totalAmount  Float?
   /// Base unit only: GRAM, MILLILITER, or PIECE.
   unit         Unit
   isPurchased  Boolean  @default(false)
@@ -180,7 +217,7 @@ model ShoppingItemDate {
 // ─── Cooking History ─────────────────────────────────────────────────────────
 
 /// Record of when a dish was cooked.
-/// Created automatically by syncCookingHistory() when a MenuItem's date passes (ADR-014).
+/// Created only when the family confirms cooking by submitting a review.
 /// Source of truth for dish.lastCookedAt (which is only a cache).
 model CookingHistory {
   id         Int      @id @default(autoincrement())
@@ -207,6 +244,15 @@ model Settings {
   daySettings Json
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+/// Tombstones keep deliberately deleted external recipes out of future imports.
+model RecipeImportExclusion {
+  source    String
+  sourceId  String
+  createdAt DateTime @default(now())
+
+  @@id([source, sourceId])
 }
 
 // ─── Authentication ────────────────────────────────────────────────────────────

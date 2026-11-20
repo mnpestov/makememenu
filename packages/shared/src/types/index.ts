@@ -1,4 +1,4 @@
-import type { Difficulty, DayOfWeek, Unit, MealType, Cook, CookPerson } from '../enums/index';
+import type { Difficulty, DayOfWeek, Unit, MealType, Cook, CookPerson, DishStatus, NutritionBasis, IngredientScaling } from '../enums/index';
 
 // ─── Category ────────────────────────────────────────────────────────────────
 
@@ -23,8 +23,10 @@ export interface Ingredient {
 
 export interface DishIngredientItem {
   ingredient: Ingredient;
-  amount: number;
+  amount: number | null;
   unit: Unit;
+  scaling?: IngredientScaling;
+  note?: string | null;
 }
 
 export interface DishSummary {
@@ -37,12 +39,22 @@ export interface DishSummary {
   servings: number;
   forBreakfast: boolean;
   forLunch: boolean;
+  status: DishStatus;
+  rating: number | null;
+  reviewComment: string | null;
   lastCookedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface DishFull extends DishSummary {
+  nutritionBasis: NutritionBasis;
+  source: string | null;
+  sourceId: string | null;
+  sourceUrl: string | null;
+  sourceLicense: string | null;
+  prepMinutes: number | null;
+  cookMinutes: number | null;
   recipe: string | null;
   calories: number | null;
   protein: number | null;
@@ -81,7 +93,7 @@ export interface ShoppingItem {
   menuId: number;
   ingredient: Ingredient;
   /** Aggregated amount in base unit (GRAM, MILLILITER, or PIECE) */
-  totalAmount: number;
+  totalAmount: number | null;
   /** Base unit stored in DB: GRAM, MILLILITER, or PIECE */
   unit: Unit;
   isPurchased: boolean;
@@ -126,4 +138,11 @@ export interface GenerationError {
     available?: number;
     existingMenuId?: number;
   };
+}
+
+export interface RecipeImportResult {
+  imported: number;
+  skipped: number;
+  total: number;
+  version: string;
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api/client';
-import type { DishSummary, WeeklyMenuFull } from '@make-me-menu/shared';
+import { DISH_STATUS_LABELS, DishStatus, type DishSummary, type WeeklyMenuFull } from '@make-me-menu/shared';
 import { X, RefreshCw } from 'lucide-react';
 import './ReplacementModal.css';
 
@@ -16,6 +16,11 @@ export function ReplacementModal({ menuId, itemId, onClose, onSuccess }: Replace
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [replacingId, setReplacingId] = useState<number | null>(null);
+  const [query, setQuery] = useState('');
+  const [status, setStatus] = useState('ALL');
+  const visibleCandidates = candidates.filter(d =>
+    (status === 'ALL' || d.status === status) && d.name.toLocaleLowerCase('ru-RU').includes(query.toLocaleLowerCase('ru-RU'))
+  );
 
   useEffect(() => {
     loadCandidates();
@@ -61,6 +66,14 @@ export function ReplacementModal({ menuId, itemId, onClose, onSuccess }: Replace
         </div>
 
         <div className="replacement-modal__body">
+          <div className="replacement-modal__filters">
+            <input aria-label="Поиск рецепта для замены" placeholder="Найти рецепт…" value={query} onChange={e => setQuery(e.target.value)} />
+            <select aria-label="Статус рецепта" value={status} onChange={e => setStatus(e.target.value)}>
+              <option value="ALL">Все подходящие</option>
+              <option value={DishStatus.TRY}>Хочу попробовать</option>
+              <option value={DishStatus.FAVORITE}>Постоянное меню</option>
+            </select>
+          </div>
           {loading ? (
             <div className="replacement-modal__loading">
               <RefreshCw className="replacement-modal__candidate-spinner" size={24} />
@@ -75,13 +88,13 @@ export function ReplacementModal({ menuId, itemId, onClose, onSuccess }: Replace
                 Повторить
               </button>
             </div>
-          ) : candidates.length === 0 ? (
+          ) : visibleCandidates.length === 0 ? (
             <div className="replacement-modal__empty">
               Подходящих вариантов для замены не найдено.
             </div>
           ) : (
             <div className="replacement-modal__list">
-              {candidates.map(dish => (
+              {visibleCandidates.map(dish => (
                 <button
                   key={dish.id}
                   className={[
@@ -103,6 +116,7 @@ export function ReplacementModal({ menuId, itemId, onClose, onSuccess }: Replace
                     <span className="replacement-modal__candidate-category">
                       {dish.category?.name || 'Без категории'}
                     </span>
+                    <span>{DISH_STATUS_LABELS[dish.status]}</span>
                     <span className="replacement-modal__candidate-difficulty">
                       • {dish.difficulty}
                     </span>

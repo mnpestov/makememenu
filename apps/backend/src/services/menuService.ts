@@ -8,7 +8,8 @@ import {
   DayOfWeek,
   Difficulty,
   DaySettings,
-  CookPerson
+  CookPerson,
+  DishStatus
 } from '@make-me-menu/shared';
 import { ConflictError, NotFoundError, AppError } from '../utils/errors';
 import { generateMenu, GenerationContext, DayConfig, MenuGenerationError, isCookSuitable } from '../domain/menuGenerator';
@@ -47,47 +48,7 @@ function getNextWeekStart(): Date {
 }
 
 export class MenuService {
-  /**
-   * Automatically updates CookingHistory based on past MenuItems without history.
-   * Updates Dish.lastCookedAt as cache.
-   */
-  async syncCookingHistory(menuId: number): Promise<void> {
-    const now = new Date();
-    
-    // Find past menu items that don't have cooking history recorded yet
-    const pastItems = await prisma.menuItem.findMany({
-      where: {
-        menuId,
-        date: { lt: now },
-        cookingHistory: { none: {} }
-      }
-    });
-
-    if (pastItems.length === 0) return;
-
-    await prisma.$transaction(async (tx) => {
-      for (const item of pastItems) {
-        // Create history record
-        const history = await tx.cookingHistory.create({
-          data: {
-            dishId: item.dishId,
-            menuItemId: item.id,
-            cookedAt: item.date
-          }
-        });
-
-        // Update Dish cache
-        await tx.dish.update({
-          where: { id: item.dishId },
-          data: { lastCookedAt: history.cookedAt }
-        });
-      }
-    });
-  }
-
   async getById(id: number): Promise<WeeklyMenuFull> {
-    await this.syncCookingHistory(id);
-
     const menu = await prisma.weeklyMenu.findUnique({
       where: { id },
       include: {
@@ -120,6 +81,9 @@ export class MenuService {
         dish: {
           id: item.dish.id,
           name: item.dish.name,
+          status: item.dish.status,
+          rating: item.dish.rating,
+          reviewComment: item.dish.reviewComment,
           category: item.dish.category ? {
             id: item.dish.category.id,
             name: item.dish.category.name,
@@ -184,7 +148,7 @@ export class MenuService {
     }
 
     const settings = await settingsService.get();
-    const dishes = await dishService.getAll();
+    const dishes = (await dishService.getAll()).filter(d => d.status === DishStatus.FAVORITE);
     const daySettingsMap = settings.daySettings as Record<DayOfWeek, DaySettings>;
 
     // Construct DayConfigs for 7 days
@@ -245,10 +209,10 @@ export class MenuService {
 
     const dish = await prisma.dish.findUnique({ where: { id: data.dishId } });
     if (!dish) throw new NotFoundError('Dish not found');
-
-    await prisma.cookingHistory.deleteMany({
-      where: { menuItemId: itemId }
-    });
+    if (dish.status === DishStatus.REJECTED) throw new ConflictError('Отклонённое блюдо нельзя добавить в меню');
+    if (item.mealType === 'BREAKFAST' ? !dish.forBreakfast : !dish.forLunch) {
+      throw new ConflictError('Блюдо не подходит для этого приёма пищи');
+    }
 
     await prisma.menuItem.update({
       where: { id: itemId },
@@ -275,7 +239,7 @@ export class MenuService {
     const availableCooks = daySetting?.availableCooks ?? [CookPerson.YULIA, CookPerson.MISHA];
 
     // Get all dishes matching mealType, difficulty, and cook
-    const allDishes = await dishService.getAll();
+    const allDishes = (await dishService.getAll()).filter(d => d.status !== DishStatus.REJECTED);
     let candidates = allDishes.filter(d => 
       (item.mealType === 'BREAKFAST' ? d.forBreakfast : d.forLunch) &&
       allowedDifficulties.includes(d.difficulty) &&

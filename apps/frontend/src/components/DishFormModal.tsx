@@ -6,6 +6,8 @@ import {
   UNIT_LABELS,
   Cook,
   COOK_LABELS,
+  NutritionBasis,
+  IngredientScaling,
   type Category, 
   type Ingredient, 
   type CreateDishDto, 
@@ -33,13 +35,14 @@ export function DishFormModal({ dishId, onClose }: DishFormModalProps) {
     cook: Cook;
     servings: number | '';
     recipe: string;
+    nutritionBasis: NutritionBasis;
     calories: number | '';
     protein: number | '';
     fat: number | '';
     carbs: number | '';
     forBreakfast: boolean;
     forLunch: boolean;
-    ingredients: { name: string; amount: number | ''; unit: Unit }[];
+    ingredients: { name: string; amount: number | ''; unit: Unit; scaling: IngredientScaling; note: string | null }[];
   }>({
     name: '',
     categoryName: '',
@@ -47,6 +50,7 @@ export function DishFormModal({ dishId, onClose }: DishFormModalProps) {
     cook: Cook.BOTH,
     servings: 1,
     recipe: '',
+    nutritionBasis: NutritionBasis.PER_SERVING,
     calories: '',
     protein: '',
     fat: '',
@@ -80,15 +84,18 @@ export function DishFormModal({ dishId, onClose }: DishFormModalProps) {
           cook: (dish.cook as Cook) || Cook.BOTH,
           servings: dish.servings,
           recipe: dish.recipe || '',
-          calories: dish.calories || 0,
-          protein: dish.protein || 0,
-          fat: dish.fat || 0,
-          carbs: dish.carbs || 0,
+          nutritionBasis: dish.nutritionBasis,
+          calories: dish.calories ?? '',
+          protein: dish.protein ?? '',
+          fat: dish.fat ?? '',
+          carbs: dish.carbs ?? '',
           forBreakfast: dish.forBreakfast,
           forLunch: dish.forLunch,
           ingredients: dish.ingredients.map(i => ({
             name: i.ingredient.name,
-            amount: i.amount,
+            amount: i.amount ?? '',
+            scaling: i.scaling ?? IngredientScaling.LINEAR,
+            note: i.note ?? null,
             unit: i.unit as Unit
           }))
         });
@@ -109,7 +116,7 @@ export function DishFormModal({ dishId, onClose }: DishFormModalProps) {
       ...prev,
       ingredients: [
         ...prev.ingredients, 
-        { name: '', amount: 1, unit: Unit.GRAM }
+        { name: '', amount: 1, unit: Unit.GRAM, scaling: IngredientScaling.LINEAR, note: null }
       ]
     }));
   };
@@ -146,14 +153,16 @@ export function DishFormModal({ dishId, onClose }: DishFormModalProps) {
 
       // Resolve Ingredients
       const finalIngredients = [];
+      const resolvedIngredients = new Map(ingredientsList.map(i => [i.name.trim().toLowerCase(), i.id]));
       for (const ing of formData.ingredients) {
         if (!ing.name.trim()) continue;
-        let ingId = ingredientsList.find(i => i.name.toLowerCase() === ing.name.trim().toLowerCase())?.id;
+        let ingId = resolvedIngredients.get(ing.name.trim().toLowerCase());
         if (!ingId) {
           const newIng = await api.ingredients.create({ name: ing.name.trim() });
           ingId = newIng.id;
+          resolvedIngredients.set(ing.name.trim().toLowerCase(), ingId);
         }
-        finalIngredients.push({ ingredientId: ingId, amount: ing.amount === '' ? 1 : ing.amount, unit: ing.unit });
+        finalIngredients.push({ ingredientId: ingId, amount: ing.unit === Unit.TO_TASTE ? null : ing.amount === '' ? 1 : ing.amount, unit: ing.unit, scaling: ing.scaling, note: ing.note });
       }
 
       const payload = {
@@ -165,6 +174,7 @@ export function DishFormModal({ dishId, onClose }: DishFormModalProps) {
         forBreakfast: formData.forBreakfast,
         forLunch: formData.forLunch,
         recipe: formData.recipe || null,
+        nutritionBasis: formData.nutritionBasis,
         calories: formData.calories === '' ? null : formData.calories,
         protein: formData.protein === '' ? null : formData.protein,
         fat: formData.fat === '' ? null : formData.fat,
@@ -281,6 +291,13 @@ export function DishFormModal({ dishId, onClose }: DishFormModalProps) {
               />
             </div>
 
+            <label>
+              КБЖУ указаны
+              <select value={formData.nutritionBasis} onChange={e => setFormData({ ...formData, nutritionBasis: e.target.value as NutritionBasis })} style={inputStyle}>
+                <option value={NutritionBasis.PER_SERVING}>На одну порцию</option>
+                <option value={NutritionBasis.PER_100G}>На 100 г</option>
+              </select>
+            </label>
             <div className="form-grid-4" style={{ gap: '1rem' }}>
               <div>
                 <label>Ккал</label>
@@ -325,6 +342,8 @@ export function DishFormModal({ dishId, onClose }: DishFormModalProps) {
                       
                       <input 
                         type="number" 
+                        disabled={ing.unit === Unit.TO_TASTE}
+                        required={ing.unit !== Unit.TO_TASTE}
                         min="0.1" 
                         step="0.1"
                         value={ing.amount} 
