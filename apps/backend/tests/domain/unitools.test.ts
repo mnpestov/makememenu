@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { IngredientScaling, Unit, ReviewDishSchema } from '@make-me-menu/shared';
-import data from '../../src/data/unitools-recipes-v1.json';
+import data from '../fixtures/unitools/unitools-recipes-v1.json';
 import { mapUnitoolsRecipe, normalizeIngredientName, UnitoolsDatasetSchema } from '../../src/imports/unitools';
 import { scaleIngredient } from '../../src/domain/ingredientScaler';
 import { buildShoppingList } from '../../src/domain/shoppingListBuilder';

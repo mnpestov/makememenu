@@ -44,6 +44,10 @@ enum Unit {
   SPRIG
   SLICE
   TO_TASTE
+  CAN
+  LEAF
+  HEAD
+  RING
 }
 
 enum DishStatus {
@@ -106,8 +110,10 @@ model Dish {
   sourceUrl     String?
   sourceLicense String?
   sourceVersion String?
+  archivedAt    DateTime?
   prepMinutes   Int?
   cookMinutes   Int?
+  totalMinutes  Int?
   /// Existing recipes retain PER_100G; imported/new recipes specify their basis.
   nutritionBasis NutritionBasis @default(PER_100G)
   calories     Float?

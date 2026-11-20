@@ -34,8 +34,10 @@ export class DishService {
       sourceId: dish.sourceId,
       sourceUrl: dish.sourceUrl,
       sourceLicense: dish.sourceLicense,
+      archivedAt: dish.archivedAt?.toISOString() ?? null,
       prepMinutes: dish.prepMinutes,
       cookMinutes: dish.cookMinutes,
+      totalMinutes: dish.totalMinutes,
       recipe: dish.recipe,
       calories: dish.calories,
       protein: dish.protein,
@@ -57,6 +59,7 @@ export class DishService {
 
   async getAll(): Promise<DishSummary[]> {
     const dishes = await prisma.dish.findMany({
+      where: { archivedAt: null },
       include: { category: true },
       orderBy: { name: 'asc' },
     });

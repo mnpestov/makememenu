@@ -13,7 +13,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
-    "db:import:unitools": "tsx --env-file=.env src/scripts/importUnitools.ts",
+    "db:catalog:switch": "tsx --env-file=.env src/scripts/switchRecipeCatalog.ts",
     "test:integration": "tsx --env-file=.env tests/runIntegration.ts"
   },
   "dependencies": {

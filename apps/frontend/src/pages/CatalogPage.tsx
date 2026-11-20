@@ -14,25 +14,6 @@ export function CatalogPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeStatus, setActiveStatus] = useState<DishStatus>(DishStatus.FAVORITE);
   const [selectedDish, setSelectedDish] = useState<DishFull | null>(null);
-  const [importing, setImporting] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
-
-  const handleImport = async () => {
-    setImporting(true);
-    setError(null);
-    setNotice(null);
-    try {
-      const result = await api.dishes.importUnitools();
-      setNotice(`Добавлено: ${result.imported}. Уже импортировано или удалено ранее: ${result.skipped}. Новые рецепты — в «Хочу попробовать».`);
-      setActiveStatus(DishStatus.TRY);
-      await loadDishes();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось импортировать рецепты');
-    } finally {
-      setImporting(false);
-    }
-  };
-
   const handleView = async (id: number) => {
     try { setSelectedDish(await api.dishes.getById(id)); }
     catch (err) { setError(err instanceof Error ? err.message : 'Не удалось открыть рецепт'); }
@@ -84,15 +65,10 @@ export function CatalogPage() {
     <>
       <header className="page-header">
         <h1 className="page-title">Каталог блюд</h1>
-        <div className="recipe-actions">
-          <button className="btn btn-secondary" disabled={importing} onClick={handleImport}>
-            {importing ? 'Импорт рецептов…' : 'Импортировать UniTools'}
-          </button>
         <button className="btn btn-primary" onClick={handleCreate}>
           <Plus size={18} />
           <span>Добавить блюдо</span>
         </button>
-        </div>
       </header>
 
       <div className="page-body">
@@ -105,7 +81,6 @@ export function CatalogPage() {
           ))}
         </div>
         <p className="catalog__hint">Недельное меню генерируется из постоянных блюд. Рецепт на пробу можно выбрать через замену блюда в меню.</p>
-        {notice && <p role="status" className="catalog__hint">{notice}</p>}
         <div className="catalog__search-wrap">
           <Search className="catalog__search-icon" size={18} />
           <input

@@ -45,9 +45,9 @@ export function DishDetailsModal({ dish: initialDish, onClose, onUpdated }: Dish
         </div>
 
         <div className="dish-modal__section">
-          <p>{DISH_STATUS_LABELS[dish.status]}{dish.rating !== null ? ` · Оценка семьи: ${dish.rating}/5` : ''}</p>
+          <p>{dish.archivedAt ? 'В архиве' : DISH_STATUS_LABELS[dish.status]}{dish.rating !== null ? ` · Оценка семьи: ${dish.rating}/5` : ''}</p>
           {dish.reviewComment && <p>{dish.reviewComment}</p>}
-          <button className="btn btn-primary" onClick={() => setReviewing(true)}>Приготовили — оценить</button>
+          {!dish.archivedAt && <button className="btn btn-primary" onClick={() => setReviewing(true)}>Приготовили — оценить</button>}
         </div>
         <div className="dish-modal__stats">
           <div className="dish-modal__stat">
@@ -62,6 +62,12 @@ export function DishDetailsModal({ dish: initialDish, onClose, onUpdated }: Dish
           </div>
         </div>
 
+        {dish.totalMinutes != null && <p className="dish-modal__section">Время: {dish.totalMinutes} мин.</p>}
+        {dish.source === 'POVARENOK' && dish.sourceUrl && (
+          <p className="dish-modal__section">
+            Источник: <a href={dish.sourceUrl} target="_blank" rel="noreferrer">Поварёнок</a>
+          </p>
+        )}
         {dish.source === 'UNITOOLS' && (
           <p className="dish-modal__section">
             Источник: <a href="https://theunitools.com/ru/data" target="_blank" rel="noreferrer">UniTools</a>

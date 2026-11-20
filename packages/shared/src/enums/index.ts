@@ -40,6 +40,10 @@ export const Unit = {
   SPRIG: 'SPRIG',
   SLICE: 'SLICE',
   TO_TASTE: 'TO_TASTE',
+  CAN: 'CAN',
+  LEAF: 'LEAF',
+  HEAD: 'HEAD',
+  RING: 'RING',
 } as const;
 
 export type Unit = (typeof Unit)[keyof typeof Unit];
@@ -59,6 +63,10 @@ export const UNIT_LABELS: Record<Unit, string> = {
   SPRIG: 'вет.',
   SLICE: 'ломт.',
   TO_TASTE: 'по вкусу',
+  CAN: 'банк.',
+  LEAF: 'лист.',
+  HEAD: 'коч.',
+  RING: 'кольц.',
 };
 
 /**

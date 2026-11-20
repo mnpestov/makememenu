@@ -14,8 +14,7 @@ import type {
   ReplaceMenuItemDto,
   ShoppingItem,
   UpdateShoppingItemDto,
-  ReviewDishDto,
-  RecipeImportResult
+  ReviewDishDto
 } from '@make-me-menu/shared';
 
 const API_BASE = '/api';
@@ -111,7 +110,6 @@ export const api = {
     searchStore: (query: string) => fetchJson<any>(`/ingredients/search-store?q=${encodeURIComponent(query)}`),
   },
   dishes: {
-    importUnitools: () => fetchJson<RecipeImportResult>('/dishes/import/unitools', { method: 'POST' }),
     review: (id: number, data: ReviewDishDto) => fetchJson<DishFull>(`/dishes/${id}/review`, {
       method: 'POST', body: JSON.stringify(data),
     }),

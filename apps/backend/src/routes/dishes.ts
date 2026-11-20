@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { importUnitools } from '../services/recipeImportService';
 import { dishService } from '../services/dishService';
 import { catchAsync } from '../utils/catchAsync';
 import { validateBody } from '../middleware/validate';
@@ -20,10 +19,6 @@ router.param('id', (_req, _res, next, value: string) => {
 router.get('/', catchAsync(async (_req, res) => {
   const dishes = await dishService.getAll();
   res.json(dishes);
-}));
-
-router.post('/import/unitools', catchAsync(async (_req, res) => {
-  res.json(await importUnitools());
 }));
 
 router.post('/:id/review', validateBody(ReviewDishSchema), catchAsync(async (req, res) => {

@@ -1,7 +1,7 @@
-import prisma from '../db/prismaClient';
-import datasetJson from '../data/unitools-recipes-v1.json';
+import prisma from '../../../src/db/prismaClient';
+import datasetJson from './unitools-recipes-v1.json';
 import { DishStatus, NutritionBasis, RecipeImportResult } from '@make-me-menu/shared';
-import { mapUnitoolsRecipe, normalizeIngredientName, UNIT_CATEGORY_NAMES, UnitoolsDatasetSchema } from '../imports/unitools';
+import { mapUnitoolsRecipe, normalizeIngredientName, UNIT_CATEGORY_NAMES, UnitoolsDatasetSchema } from '../../../src/imports/unitools';
 
 export async function importUnitools(): Promise<RecipeImportResult> {
   // Validate everything before the first write. Data is pinned, so runtime needs no network.

@@ -53,8 +53,10 @@ export interface DishFull extends DishSummary {
   sourceId: string | null;
   sourceUrl: string | null;
   sourceLicense: string | null;
+  archivedAt?: string | null;
   prepMinutes: number | null;
   cookMinutes: number | null;
+  totalMinutes?: number | null;
   recipe: string | null;
   calories: number | null;
   protein: number | null;

@@ -29,6 +29,8 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+COPY everyday-recipes-review.json ./
+
 # Install pnpm
 RUN npm install -g pnpm
 

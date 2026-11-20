@@ -209,6 +209,7 @@ export class MenuService {
 
     const dish = await prisma.dish.findUnique({ where: { id: data.dishId } });
     if (!dish) throw new NotFoundError('Dish not found');
+    if (dish.archivedAt) throw new ConflictError('Архивное блюдо нельзя добавить в меню');
     if (dish.status === DishStatus.REJECTED) throw new ConflictError('Отклонённое блюдо нельзя добавить в меню');
     if (item.mealType === 'BREAKFAST' ? !dish.forBreakfast : !dish.forLunch) {
       throw new ConflictError('Блюдо не подходит для этого приёма пищи');
